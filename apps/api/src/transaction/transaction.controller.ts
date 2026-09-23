@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Patch } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -16,4 +16,13 @@ export class TransactionController {
   async findAll(@Param('merchantId') merchantId: string) {
     return this.transactionService.getTransactionsByMerchant(merchantId);
   }
+
+@Patch(':id/status')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() body: { status: 'SUCCESS' | 'FAILED' },
+  ) {
+    return this.transactionService.updateTransactionStatus(id, body.status);
+  }
+
 }

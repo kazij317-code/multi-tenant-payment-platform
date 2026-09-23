@@ -52,4 +52,27 @@ export class TransactionService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+// ট্রানজেকশনের স্ট্যাটাস আপডেট করার মেথড
+async updateTransactionStatus(transactionId: string, status: 'SUCCESS' | 'FAILED') {
+  const transaction = await this.prisma.transaction.findUnique({
+    where: { id: transactionId },
+  });
+
+  if (!transaction) {
+    throw new BadRequestException('Transaction not found');
+  }
+
+  // স্ট্যাটাস আপডেট করা
+  const updatedTransaction = await this.prisma.transaction.update({
+    where: { id: transactionId },
+    data: { status },
+  });
+
+  return {
+    message: `Transaction status updated to ${status} successfully`,
+    transaction: updatedTransaction,
+  };
+}
+
 }
