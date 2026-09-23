@@ -15,6 +15,7 @@ model Tenant {
   updatedAt DateTime @updatedAt
 
   users     User[]
+  merchants Merchant[] // এটি যুক্ত করো
   
   @@map("tenants")
 }
@@ -37,3 +38,18 @@ model User {
   @@map("users")
 }
 
+model Merchant {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  status      String   @default("ACTIVE") // ACTIVE বা SUSPENDED
+  
+  // টিনেন্টের সাথে রিলেশন
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("merchants")
+}
