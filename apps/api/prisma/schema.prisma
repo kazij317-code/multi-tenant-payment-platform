@@ -48,8 +48,27 @@ model Merchant {
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  transactions Transaction[] // এটি যুক্ত করো
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("merchants")
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  amount        Float
+  currency      String   @default("BDT")
+  status        String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  reference     String   @unique // ইউনিক ট্রানজেকশন রেফারেন্স বা আইডি
+  
+  // কার অধীনে ট্রানজেকশনটি হচ্ছে (Merchant-এর সাথে রিলেশন)
+  merchantId    String
+  merchant      Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("transactions")
 }
