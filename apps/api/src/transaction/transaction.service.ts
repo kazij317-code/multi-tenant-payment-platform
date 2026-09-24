@@ -75,4 +75,28 @@ async updateTransactionStatus(transactionId: string, status: 'SUCCESS' | 'FAILED
   };
 }
 
+// পেমেন্ট গেটওয়ে থেকে আসা ওয়েবহুক হ্যান্ডেল করার মেথড
+async handlePaymentWebhook(dto: { reference: string; status: 'SUCCESS' | 'FAILED' }) {
+  // ট্রানজেকশন রেফারেন্স দিয়ে ট্রানজেকশন খুঁজে বের করা
+  const transaction = await this.prisma.transaction.findUnique({
+    where: { reference: dto.reference },
+  });
+
+  if (!transaction) {
+    throw new BadRequestException('Transaction reference not found');
+  }
+
+  // স্ট্যাটাস আপডেট করা
+  const updatedTransaction = await this.prisma.transaction.update({
+    where: { id: transaction.id },
+    data: { status: dto.status },
+  });
+
+  return {
+    success: true,
+    message: `Webhook processed. Transaction ${dto.reference} updated to ${dto.status}`,
+    transaction: updatedTransaction,
+  };
+}
+
 }
