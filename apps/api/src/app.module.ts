@@ -6,9 +6,11 @@ import { TenantsModule } from './tenants/tenants.module';
 import { AuthModule } from './auth/auth.module';
 import { MerchantModule } from './merchant/merchant.module'; // এটি ইমপোর্ট করো
 import { TransactionModule } from './transaction/transaction.module';
+import { UserModule } from './user/user.module';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
 
 @Module({
-  imports: [PrismaModule, TenantsModule, AuthModule, MerchantModule, TransactionModule], // এখানে যুক্ত করো
+  imports: [PrismaModule, TenantsModule, AuthModule, MerchantModule, TransactionModule, UserModule, AuditLogsModule], // এখানে যুক্ত করো
   controllers: [AppController],
   providers: [AppService],
 })

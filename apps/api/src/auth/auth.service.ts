@@ -69,7 +69,12 @@ export class AuthService {
     }
 
     // ৪. JWT টোকেন জেনারেট করা
-    const payload = { sub: user.id, email: user.email, tenantId: tenant.id };
+   const payload = { 
+  sub: user.id, 
+  email: user.email, 
+  tenantId: tenant.id, 
+  role: user.role // এই রোলটি যোগ করতে হবে
+};
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: 'SUPER_SECRET_KEY_HERE', // পরবর্তীতে আমরা এটি .env ফাইলে সরিয়ে নেব
       expiresIn: '1d',

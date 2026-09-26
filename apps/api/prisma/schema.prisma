@@ -16,9 +16,20 @@ model Tenant {
 
   users     User[]
   merchants Merchant[] // এটি যুক্ত করো
+  auditLogs AuditLog[]
   
   @@map("tenants")
 }
+
+// উদাহরণস্বরূপ User মডেলটি এমন হবে:
+enum Role {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  MANAGER
+  OPERATOR
+  VIEWER
+}
+
 
 model User {
   id           String   @id @default(uuid())
@@ -27,6 +38,8 @@ model User {
   firstName    String?
   lastName     String?
   isActive     Boolean  @default(true)
+
+  role      Role     @default(VIEWER) // ডিফল্ট রোল ভিউয়ার হিসেবে থাকবে
   
   // Multi-tenant relation: প্রতিটি ইউজার কোনো না কোনো টিনেন্টের সাথে যুক্ত থাকবে
   tenantId     String
@@ -34,6 +47,8 @@ model User {
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  
 
   @@map("users")
 }
@@ -71,4 +86,15 @@ model Transaction {
   updatedAt     DateTime @updatedAt
 
   @@map("transactions")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // যেমন: 'USER_CREATED', 'PAYMENT_PROCESSED' ইত্যাদি
+  userId    String   // কাজটি যে ইউজার করেছে তার আইডি
+  tenantId  String   // কোন টিনেন্টের অধীনে ঘটনাটি ঘটেছে
+  details   String?  // অতিরিক্ত তথ্য (JSON বা স্ট্রিং আকারে)
+  createdAt DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
