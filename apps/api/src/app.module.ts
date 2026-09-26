@@ -8,9 +8,10 @@ import { MerchantModule } from './merchant/merchant.module'; // এটি ইম
 import { TransactionModule } from './transaction/transaction.module';
 import { UserModule } from './user/user.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
-  imports: [PrismaModule, TenantsModule, AuthModule, MerchantModule, TransactionModule, UserModule, AuditLogsModule], // এখানে যুক্ত করো
+  imports: [PrismaModule, TenantsModule, AuthModule, MerchantModule, TransactionModule, UserModule, AuditLogsModule, ReportsModule], // এখানে যুক্ত করো
   controllers: [AppController],
   providers: [AppService],
 })
