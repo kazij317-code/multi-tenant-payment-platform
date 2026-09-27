@@ -10,9 +10,10 @@ import { UserModule } from './user/user.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { ReportsModule } from './reports/reports.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { MerchantsModule } from './merchants/merchants.module';
 
 @Module({
-  imports: [PrismaModule, TenantsModule, AuthModule, MerchantModule, TransactionModule, UserModule, AuditLogsModule, ReportsModule, TransactionsModule], // এখানে যুক্ত করো
+  imports: [PrismaModule, TenantsModule, AuthModule, MerchantModule, TransactionModule, UserModule, AuditLogsModule, ReportsModule, TransactionsModule, MerchantsModule], // এখানে যুক্ত করো
   controllers: [AppController],
   providers: [AppService],
 })
