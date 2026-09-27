@@ -318,10 +318,14 @@
 
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class TransactionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService, // ২. এখানে ইনজেক্ট করুন
+  ) {}
 
   // নতুন ট্রানজেকশন তৈরি (টিনেন্ট আইসোলেশন সহ)
   async createTransaction(
@@ -409,6 +413,14 @@ export class TransactionsService {
       where: { id: transactionId },
       data: { status: 'SUCCESS' }, // অথবা APPROVED রাখতে চাইলে স্ট্রিং কাস্টমাইজ করতে পারো
     });
+    // === এই কোডটি এখানে বসাতে হবে ===
+    await this.notificationsService.createNotification({
+      title: 'Transaction Approved',
+      message: `Transaction ${transaction.reference} has been approved successfully.`,
+      type: 'TRANSACTION',
+      tenantId: tenantId,
+    });
+    // ===================================
 
     return {
       message: 'Transaction approved successfully',

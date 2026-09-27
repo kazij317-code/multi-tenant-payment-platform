@@ -13,7 +13,7 @@ model Tenant {
   slug      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+notifications Notification[] // এই লাইনটি যোগ করতে হবে
   users     User[]
   merchants Merchant[] // এটি যুক্ত করো
   auditLogs AuditLog[]
@@ -98,4 +98,15 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  type      String   // যেমন: TRANSACTION, MERCHANT, USER ইত্যাদি
+  isRead    Boolean  @default(false)
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
