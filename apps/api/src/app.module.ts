@@ -12,9 +12,10 @@ import { MerchantsModule } from './merchants/merchants.module';
 import { PaymentsModule } from './payments/payments.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
-  imports: [PrismaModule, TenantsModule, AuthModule, MerchantsModule, TransactionsModule, UsersModule, AuditLogsModule, ReportsModule, TransactionsModule, MerchantsModule, PaymentsModule, WebhooksModule, NotificationsModule], // এখানে যুক্ত করো
+  imports: [PrismaModule, TenantsModule, AuthModule, MerchantsModule, TransactionsModule, UsersModule, AuditLogsModule, ReportsModule, TransactionsModule, MerchantsModule, PaymentsModule, WebhooksModule, NotificationsModule, MailModule], // এখানে যুক্ত করো
   controllers: [AppController],
   providers: [AppService],
 })

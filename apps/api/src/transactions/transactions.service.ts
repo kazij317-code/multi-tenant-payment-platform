@@ -319,12 +319,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService, // ২. এখানে ইনজেক্ট করুন
+    private mailService: MailService, // ২. এখানে ইনজেক্ট করুন
   ) {}
 
   // নতুন ট্রানজেকশন তৈরি (টিনেন্ট আইসোলেশন সহ)
@@ -403,6 +405,7 @@ export class TransactionsService {
         id: transactionId,
         merchant: { tenantId },
       },
+      include: { merchant: true }, // যদি মার্চেন্টের ইমেল প্রয়োজন হয়
     });
 
     if (!transaction) {
@@ -421,6 +424,11 @@ export class TransactionsService {
       tenantId: tenantId,
     });
     // ===================================
+    // === ইমেল নোটিফিকেশন কোড এখানে বসবে ===
+    // (ধরে নিচ্ছি আপনার মার্চেন্ট বা ইউজারের ইমেল ফিল্ড রয়েছে)
+    const userEmail = transaction.merchant?.email || 'admin@example.com'; 
+    await this.mailService.sendTransactionEmail(userEmail, transaction.reference, 'SUCCESS');
+    // ==========================================
 
     return {
       message: 'Transaction approved successfully',
