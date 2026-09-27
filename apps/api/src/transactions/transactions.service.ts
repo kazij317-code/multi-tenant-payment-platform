@@ -1,19 +1,95 @@
+// // // import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+// // // import { PrismaService } from '../prisma/prisma.service';
+
+// // // @Injectable()
+// // // export class TransactionsService {
+// // //   constructor(private prisma: PrismaService) {}
+
+// // //   // নতুন ট্রানজেকশন তৈরি বা প্রসেস করা
+// // //   async createTransaction(dto: {
+// // //     amount: number;
+// // //     currency?: string;
+// // //     reference: string;
+// // //     merchantId: string;
+// // //     status?: string;
+// // //   }, tenantId: string) {
+// // //     // ১. মার্চেন্টটি এই টিনেন্টের অধীনে আছে কি না যাচাই করা
+// // //     const merchant = await this.prisma.merchant.findFirst({
+// // //       where: {
+// // //         id: dto.merchantId,
+// // //         tenantId: tenantId,
+// // //       },
+// // //     });
+
+// // //     if (!merchant) {
+// // //       throw new NotFoundException('Merchant not found or does not belong to this tenant');
+// // //     }
+
+// // //     // ২. একই রেফারেন্সের ট্রানজেকশন আগে আছে কি না চেক করা
+// // //     const existingTx = await this.prisma.transaction.findUnique({
+// // //       where: { reference: dto.reference },
+// // //     });
+
+// // //     if (existingTx) {
+// // //       throw new BadRequestException('Transaction with this reference already exists');
+// // //     }
+
+// // //     // ৩. ট্রানজেকশন তৈরি করা
+// // //     const transaction = await this.prisma.transaction.create({
+// // //       data: {
+// // //         amount: dto.amount,
+// // //         currency: dto.currency || 'BDT',
+// // //         status: dto.status || 'SUCCESS', // টেস্টের জন্য ডিফল্ট SUCCESS রাখতে পারো
+// // //         reference: dto.reference,
+// // //         merchantId: dto.merchantId,
+// // //       },
+// // //     });
+
+// // //     return {
+// // //       message: 'Transaction processed successfully',
+// // //       transaction,
+// // //     };
+// // //   }
+
+// // //   // নির্দিষ্ট টিনেন্টের সব ট্রানজেকশন দেখা
+// // //   async getTransactionsByTenant(tenantId: string) {
+// // //     return this.prisma.transaction.findMany({
+// // //       where: {
+// // //         merchant: {
+// // //           tenantId: tenantId,
+// // //         },
+// // //       },
+// // //       include: {
+// // //         merchant: {
+// // //           select: { name: true, email: true },
+// // //         },
+// // //       },
+// // //       orderBy: { createdAt: 'desc' },
+// // //     });
+// // //   }
+// // // }
+// // // ------------------
+
 // // import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 // // import { PrismaService } from '../prisma/prisma.service';
+// // import { TransactionStatus } from '@prisma/client';
 
 // // @Injectable()
 // // export class TransactionsService {
 // //   constructor(private prisma: PrismaService) {}
 
-// //   // নতুন ট্রানজেকশন তৈরি বা প্রসেস করা
-// //   async createTransaction(dto: {
-// //     amount: number;
-// //     currency?: string;
-// //     reference: string;
-// //     merchantId: string;
-// //     status?: string;
-// //   }, tenantId: string) {
-// //     // ১. মার্চেন্টটি এই টিনেন্টের অধীনে আছে কি না যাচাই করা
+// //   // নতুন ট্রানজেকশন তৈরি (টিনেন্ট আইসোলেশন সহ)
+// //   async createTransaction(
+// //     dto: {
+// //       amount: number;
+// //       currency?: string;
+// //       reference: string;
+// //       merchantId: string;
+// //       status?: TransactionStatus;
+// //     },
+// //     tenantId: string,
+// //   ) {
+// //     // মার্চেন্টটি এই টিনেন্টের অধীনে আছে কি না যাচাই করা
 // //     const merchant = await this.prisma.merchant.findFirst({
 // //       where: {
 // //         id: dto.merchantId,
@@ -25,7 +101,7 @@
 // //       throw new NotFoundException('Merchant not found or does not belong to this tenant');
 // //     }
 
-// //     // ২. একই রেফারেন্সের ট্রানজেকশন আগে আছে কি না চেক করা
+// //     // ইউনিক রেফারেন্স চেক করা
 // //     const existingTx = await this.prisma.transaction.findUnique({
 // //       where: { reference: dto.reference },
 // //     });
@@ -34,12 +110,11 @@
 // //       throw new BadRequestException('Transaction with this reference already exists');
 // //     }
 
-// //     // ৩. ট্রানজেকশন তৈরি করা
 // //     const transaction = await this.prisma.transaction.create({
 // //       data: {
 // //         amount: dto.amount,
 // //         currency: dto.currency || 'BDT',
-// //         status: dto.status || 'SUCCESS', // টেস্টের জন্য ডিফল্ট SUCCESS রাখতে পারো
+// //         status: dto.status || TransactionStatus.PENDING,
 // //         reference: dto.reference,
 // //         merchantId: dto.merchantId,
 // //       },
@@ -51,28 +126,76 @@
 // //     };
 // //   }
 
-// //   // নির্দিষ্ট টিনেন্টের সব ট্রানজেকশন দেখা
-// //   async getTransactionsByTenant(tenantId: string) {
+// //   // নির্দিষ্ট টিনেন্টের ট্রানজেকশন লিস্ট ও স্ট্যাটাস/মার্চেন্ট ফিল্টারিং
+// //   async getTransactionsByTenant(
+// //     tenantId: string,
+// //     status?: TransactionStatus,
+// //     merchantId?: string,
+// //   ) {
 // //     return this.prisma.transaction.findMany({
 // //       where: {
 // //         merchant: {
 // //           tenantId: tenantId,
 // //         },
+// //         ...(status && { status }),
+// //         ...(merchantId && { merchantId }),
 // //       },
 // //       include: {
 // //         merchant: {
-// //           select: { name: true, email: true },
+// //           select: { id: true, name: true, email: true },
 // //         },
 // //       },
 // //       orderBy: { createdAt: 'desc' },
 // //     });
 // //   }
-// // }
-// // ------------------
 
+// //   // ট্রানজেকশনের স্ট্যাটাস আপডেট করা
+// //   async updateTransactionStatus(transactionId: string, status: TransactionStatus) {
+// //     const transaction = await this.prisma.transaction.findUnique({
+// //       where: { id: transactionId },
+// //     });
+
+// //     if (!transaction) {
+// //       throw new NotFoundException('Transaction not found');
+// //     }
+
+// //     const updatedTransaction = await this.prisma.transaction.update({
+// //       where: { id: transactionId },
+// //       data: { status },
+// //     });
+
+// //     return {
+// //       message: `Transaction status updated to ${status} successfully`,
+// //       transaction: updatedTransaction,
+// //     };
+// //   }
+
+// //   // পেমেন্ট গেটওয়ে থেকে আসা ওয়েবহুক হ্যান্ডেল করা
+// //   async handlePaymentWebhook(dto: { reference: string; status: TransactionStatus }) {
+// //     const transaction = await this.prisma.transaction.findUnique({
+// //       where: { reference: dto.reference },
+// //     });
+
+// //     if (!transaction) {
+// //       throw new BadRequestException('Transaction reference not found');
+// //     }
+
+// //     const updatedTransaction = await this.prisma.transaction.update({
+// //       where: { id: transaction.id },
+// //       data: { status: dto.status },
+// //     });
+
+// //     return {
+// //       success: true,
+// //       message: `Webhook processed. Transaction ${dto.reference} updated to ${dto.status}`,
+// //       transaction: updatedTransaction,
+// //     };
+// //   }
+// // }
+
+// // ---------------
 // import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 // import { PrismaService } from '../prisma/prisma.service';
-// import { TransactionStatus } from '@prisma/client';
 
 // @Injectable()
 // export class TransactionsService {
@@ -85,11 +208,10 @@
 //       currency?: string;
 //       reference: string;
 //       merchantId: string;
-//       status?: TransactionStatus;
+//       status?: 'SUCCESS' | 'PENDING' | 'FAILED';
 //     },
 //     tenantId: string,
 //   ) {
-//     // মার্চেন্টটি এই টিনেন্টের অধীনে আছে কি না যাচাই করা
 //     const merchant = await this.prisma.merchant.findFirst({
 //       where: {
 //         id: dto.merchantId,
@@ -101,7 +223,6 @@
 //       throw new NotFoundException('Merchant not found or does not belong to this tenant');
 //     }
 
-//     // ইউনিক রেফারেন্স চেক করা
 //     const existingTx = await this.prisma.transaction.findUnique({
 //       where: { reference: dto.reference },
 //     });
@@ -114,7 +235,7 @@
 //       data: {
 //         amount: dto.amount,
 //         currency: dto.currency || 'BDT',
-//         status: dto.status || TransactionStatus.PENDING,
+//         status: dto.status || 'PENDING',
 //         reference: dto.reference,
 //         merchantId: dto.merchantId,
 //       },
@@ -126,10 +247,10 @@
 //     };
 //   }
 
-//   // নির্দিষ্ট টিনেন্টের ট্রানজেকশন লিস্ট ও স্ট্যাটাস/মার্চেন্ট ফিল্টারিং
+//   // নির্দিষ্ট টিনেন্টের ট্রানজেকশন লিস্ট ও ফিল্টারিং
 //   async getTransactionsByTenant(
 //     tenantId: string,
-//     status?: TransactionStatus,
+//     status?: 'SUCCESS' | 'PENDING' | 'FAILED',
 //     merchantId?: string,
 //   ) {
 //     return this.prisma.transaction.findMany({
@@ -150,7 +271,7 @@
 //   }
 
 //   // ট্রানজেকশনের স্ট্যাটাস আপডেট করা
-//   async updateTransactionStatus(transactionId: string, status: TransactionStatus) {
+//   async updateTransactionStatus(transactionId: string, status: 'SUCCESS' | 'PENDING' | 'FAILED') {
 //     const transaction = await this.prisma.transaction.findUnique({
 //       where: { id: transactionId },
 //     });
@@ -170,8 +291,8 @@
 //     };
 //   }
 
-//   // পেমেন্ট গেটওয়ে থেকে আসা ওয়েবহুক হ্যান্ডেল করা
-//   async handlePaymentWebhook(dto: { reference: string; status: TransactionStatus }) {
+//   // পেমেন্ট গেটওয়ে ওয়েবহুক হ্যান্ডেল করা
+//   async handlePaymentWebhook(dto: { reference: string; status: 'SUCCESS' | 'PENDING' | 'FAILED' }) {
 //     const transaction = await this.prisma.transaction.findUnique({
 //       where: { reference: dto.reference },
 //     });
@@ -193,7 +314,8 @@
 //   }
 // }
 
-// ---------------
+// -------------------
+
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -208,7 +330,7 @@ export class TransactionsService {
       currency?: string;
       reference: string;
       merchantId: string;
-      status?: 'SUCCESS' | 'PENDING' | 'FAILED';
+      status?: 'SUCCESS' | 'PENDING' | 'FAILED' | 'APPROVED' | 'REJECTED' | 'REFUNDED';
     },
     tenantId: string,
   ) {
@@ -250,7 +372,7 @@ export class TransactionsService {
   // নির্দিষ্ট টিনেন্টের ট্রানজেকশন লিস্ট ও ফিল্টারিং
   async getTransactionsByTenant(
     tenantId: string,
-    status?: 'SUCCESS' | 'PENDING' | 'FAILED',
+    status?: 'SUCCESS' | 'PENDING' | 'FAILED' | 'APPROVED' | 'REJECTED' | 'REFUNDED',
     merchantId?: string,
   ) {
     return this.prisma.transaction.findMany({
@@ -270,23 +392,78 @@ export class TransactionsService {
     });
   }
 
-  // ট্রানজেকশনের স্ট্যাটাস আপডেট করা
-  async updateTransactionStatus(transactionId: string, status: 'SUCCESS' | 'PENDING' | 'FAILED') {
-    const transaction = await this.prisma.transaction.findUnique({
-      where: { id: transactionId },
+  // ট্রানজেকশন অ্যাপ্রুভ করা
+  async approveTransaction(transactionId: string, tenantId: string) {
+    const transaction = await this.prisma.transaction.findFirst({
+      where: {
+        id: transactionId,
+        merchant: { tenantId },
+      },
     });
 
     if (!transaction) {
-      throw new NotFoundException('Transaction not found');
+      throw new NotFoundException('Transaction not found or does not belong to this tenant');
     }
 
     const updatedTransaction = await this.prisma.transaction.update({
       where: { id: transactionId },
-      data: { status },
+      data: { status: 'SUCCESS' }, // অথবা APPROVED রাখতে চাইলে স্ট্রিং কাস্টমাইজ করতে পারো
     });
 
     return {
-      message: `Transaction status updated to ${status} successfully`,
+      message: 'Transaction approved successfully',
+      transaction: updatedTransaction,
+    };
+  }
+
+  // ট্রানজেকশন রিজেক্ট করা
+  async rejectTransaction(transactionId: string, tenantId: string) {
+    const transaction = await this.prisma.transaction.findFirst({
+      where: {
+        id: transactionId,
+        merchant: { tenantId },
+      },
+    });
+
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found or does not belong to this tenant');
+    }
+
+    const updatedTransaction = await this.prisma.transaction.update({
+      where: { id: transactionId },
+      data: { status: 'FAILED' },
+    });
+
+    return {
+      message: 'Transaction rejected successfully',
+      transaction: updatedTransaction,
+    };
+  }
+
+  // ট্রানজেকশন রিফান্ড করা
+  async refundTransaction(transactionId: string, tenantId: string) {
+    const transaction = await this.prisma.transaction.findFirst({
+      where: {
+        id: transactionId,
+        merchant: { tenantId },
+      },
+    });
+
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found or does not belong to this tenant');
+    }
+
+    if (transaction.status !== 'SUCCESS') {
+      throw new BadRequestException('Only successful transactions can be refunded');
+    }
+
+    const updatedTransaction = await this.prisma.transaction.update({
+      where: { id: transactionId },
+      data: { status: 'REFUNDED' },
+    });
+
+    return {
+      message: 'Transaction refunded successfully',
       transaction: updatedTransaction,
     };
   }
