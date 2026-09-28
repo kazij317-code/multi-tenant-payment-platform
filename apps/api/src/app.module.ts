@@ -13,10 +13,24 @@ import { PaymentsModule } from './payments/payments.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MailModule } from './mail/mail.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
-  imports: [PrismaModule, TenantsModule, AuthModule, MerchantsModule, TransactionsModule, UsersModule, AuditLogsModule, ReportsModule, TransactionsModule, MerchantsModule, PaymentsModule, WebhooksModule, NotificationsModule, MailModule], // এখানে যুক্ত করো
+  imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // সময় মিলিিসেকেন্ডে (এখানে ৬০ সেকেন্ড বা ১ মিনিট)
+        limit: 10,  // এই সময়ের মধ্যে সর্বোচ্চ কয়টি রিকোয়েস্ট করা যাবে
+      },
+    ]),
+    PrismaModule, TenantsModule, AuthModule, MerchantsModule, TransactionsModule, UsersModule, AuditLogsModule, ReportsModule, TransactionsModule, MerchantsModule, PaymentsModule, WebhooksModule, NotificationsModule, MailModule], // এখানে যুক্ত করো
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard, // গ্লোবালি সমস্ত এন্ডপয়েন্টে এটি কাজ করবে
+    },
+    AppService],
 })
 export class AppModule {}
