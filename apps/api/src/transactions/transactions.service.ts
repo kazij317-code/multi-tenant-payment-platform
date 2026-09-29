@@ -336,7 +336,7 @@ export class TransactionsService {
       currency?: string;
       reference: string;
       merchantId: string;
-      status?: 'SUCCESS' | 'PENDING' | 'FAILED' | 'APPROVED' | 'REJECTED' | 'REFUNDED';
+      status?: 'SUCCESS' | 'PENDING' | 'FAILED' | 'APPROVED' | 'REJECTED' | 'REFUNDED' | 'PROCESSING' | 'COMPLETED';
     },
     tenantId: string,
   ) {

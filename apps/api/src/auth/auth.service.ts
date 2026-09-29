@@ -91,6 +91,7 @@
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from '../mail/mail.service'; // আপনার প্রজেক্টের পাথ অনুযায়ী ঠিক করে নেবেন
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -98,6 +99,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private mailService: MailService, // MailService ইঞ্জেক্ট করা হলো
   ) {}
 
   // টোকেন জেনারেট করার হেল্পার মেথড
@@ -214,9 +216,20 @@ export class AuthService {
   // পাসওয়ার্ড ভুলে যাওয়ার রিকোয়েস্ট (মকড)
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new BadRequestException('User with this email not found');
+    if (!user) {
+      throw new BadRequestException('User with this email not found');
+    }
 
-    return { message: 'Password reset instructions sent to email (Mocked)' };
+    // একটি সাময়িক রিসেট টোকেন জেনারেট করা যেতে পারে
+    const resetToken = this.jwtService.sign(
+      { sub: user.id, email: user.email },
+      { secret: process.env.JWT_SECRET || 'SUPER_SECRET_KEY_HERE', expiresIn: '15m' },
+    );
+
+    // MailService ব্যবহার করে রিয়েল ইমেল পাঠানো
+    await this.mailService.sendPasswordResetEmail(email, resetToken);
+
+    return { message: 'Password reset instructions sent to your email successfully.' };
   }
 
   // // পাসওয়ার্ড রিসেট করা
