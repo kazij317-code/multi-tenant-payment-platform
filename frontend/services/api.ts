@@ -37,4 +37,21 @@ API.interceptors.request.use(
   }
 );
 
+// রেসপন্স ইন্টারসেপ্টর: ৪০১ (মেয়াদোত্তীর্ণ/ইনভ্যালিড টোকেন) এলে লোকালস্টোরেজ ক্লিয়ার ও রিডাইরেক্ট করা
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (window.location.pathname.startsWith('/dashboard')) {
+          window.location.href = '/login';
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default API;

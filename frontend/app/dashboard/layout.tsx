@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
-import UserMenu from '@/components/UserMenu';
+import Navbar from '@/components/Navbar';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -27,15 +27,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm z-10">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 className="text-xl font-semibold text-gray-800 capitalize">Dashboard</h1>
-            <UserMenu />
-          </div>
-        </header>
+    <div className="flex flex-col h-screen bg-gray-100 overflow-hidden">
+      {/* Top Main Navbar */}
+      <Navbar />
+
+      {/* Main Body below Navbar */}
+      <div className="flex flex-1 pt-16 overflow-hidden">
+        <Sidebar />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>

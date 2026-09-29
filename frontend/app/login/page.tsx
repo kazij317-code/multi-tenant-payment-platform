@@ -327,7 +327,7 @@ export default function LoginPage() {
       }
       localStorage.setItem('user', JSON.stringify({ email, name: email.split('@')[0] }));
 
-      router.push('/');
+      router.push('/dashboard');
 
     } catch (err: any) {
       console.error('Login failed', err);

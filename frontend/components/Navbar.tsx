@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import UserMenu from '@/components/UserMenu';
+import NotificationsDropdown from '@/components/NotificationsDropdown';
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,6 +52,7 @@ export default function Navbar() {
 
           {/* Right Menu */}
           <div className="flex items-center space-x-4">
+            {isLoggedIn && <NotificationsDropdown />}
             <UserMenu />
           </div>
         </div>
