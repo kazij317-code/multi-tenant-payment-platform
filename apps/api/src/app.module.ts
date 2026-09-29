@@ -15,6 +15,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { MailModule } from './mail/mail.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ApiKeysModule } from './api-keys/api-keys.module';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
         limit: 10,  // এই সময়ের মধ্যে সর্বোচ্চ কয়টি রিকোয়েস্ট করা যাবে
       },
     ]),
-    PrismaModule, TenantsModule, AuthModule, MerchantsModule, TransactionsModule, UsersModule, AuditLogsModule, ReportsModule, TransactionsModule, MerchantsModule, PaymentsModule, WebhooksModule, NotificationsModule, MailModule], // এখানে যুক্ত করো
+    PrismaModule, TenantsModule, AuthModule, MerchantsModule, TransactionsModule, UsersModule, AuditLogsModule, ReportsModule, TransactionsModule, MerchantsModule, PaymentsModule, WebhooksModule, NotificationsModule, MailModule, ApiKeysModule], // এখানে যুক্ত করো
   controllers: [AppController],
   providers: [
     {

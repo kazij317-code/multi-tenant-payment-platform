@@ -25,6 +25,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'; // সোয়�
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // CORS এনাবল করার কোডটি এখানে বসিয়ে দিন
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
 
   // গ্লোবাল ভ্যালিডেশন পাইপ যুক্ত করা
   app.useGlobalPipes(new ValidationPipe({
@@ -44,6 +50,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document); // ব্রাউজারে http://localhost:3000/api-docs লিংকে সোয়াগার ইউআই দেখা যাবে
 
-  await app.listen(3000);
+  // await app.listen(3000);
+  await app.listen(5000);
 }
 bootstrap();
