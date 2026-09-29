@@ -17,7 +17,7 @@
 // // //       // const response = await API.post('/auth/login', { email, password });
 // // //       // console.log(response.data);
 // // //     console.log({ email, password });
-    
+
 // // //     // Temporarily redirecting to dashboard on successful login
 // // //     router.push('/dashboard');
 // // //     } catch (error) {
@@ -105,7 +105,7 @@
 // //       // NestJS ব্যাকএন্ডে লগইন রিকোয়েস্ট পাঠানো
 // //       const response = await API.post('/auth/login', { email, password });
 // //       console.log('Login successful:', response.data);
-      
+
 // //       // সফলভাবে লগইন হওয়ার পর ড্যাশবোর্ডে রিডাইরেক্ট করা
 // //       router.push('/dashboard');
 // //     } catch (err: any) {
@@ -207,7 +207,7 @@
 //         tenantSlug 
 //       });
 //       console.log('Login successful:', response.data);
-      
+
 //       // সফলভাবে লগইন হওয়ার পর ড্যাশবোর্ডে রিডাইরেক্ট করা
 //       router.push('/dashboard');
 //     } catch (err: any) {
@@ -311,12 +311,12 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     try {
-      const response = await API.post('/auth/login', { 
-        email, 
-        password, 
-        tenantSlug 
+      const response = await API.post('/auth/login', {
+        email,
+        password,
+        tenantSlug
       });
-      
+
       console.log('Login successful:', response.data);
 
       // ব্যাকএন্ড থেকে আসা JWT টোকেন লোকাল স্টোরেজে সংরক্ষণ করা 
@@ -325,7 +325,7 @@ export default function LoginPage() {
       if (token) {
         localStorage.setItem('token', token);
       }
-      
+
       // সফলভাবে লগইন হওয়ার পর ড্যাশবোর্ডে রিডাইরেক্ট করা
       router.push('/dashboard');
     } catch (err: any) {
@@ -398,12 +398,20 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <div className="text-center text-sm">
-            <span className="text-gray-600">Don't have an account? </span>
-            <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Register
-            </Link>
+          <div className="flex items-center justify-between text-sm">
+            <div>
+              <span className="text-gray-600">Don't have an account? </span>
+              <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Register
+              </Link>
+            </div>
+            <div>
+              <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Forgot password?
+              </Link>
+            </div>
           </div>
+
         </form>
       </div>
     </div>
