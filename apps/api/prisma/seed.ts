@@ -6,6 +6,35 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
+  // 0. System Master Tenant & Super Admin User
+  const systemTenant = await prisma.tenant.upsert({
+    where: { slug: 'system' },
+    update: {},
+    create: {
+      name: 'System Administration',
+      slug: 'system',
+      status: 'ACTIVE',
+    },
+  });
+
+  const hashedPasswordAdmin = await bcrypt.hash('SuperAdmin@123', 10);
+  await prisma.user.upsert({
+    where: { email: 'admin@platform.com' },
+    update: {
+      passwordHash: hashedPasswordAdmin,
+      role: 'SUPER_ADMIN',
+      tenantId: systemTenant.id,
+    },
+    create: {
+      email: 'admin@platform.com',
+      passwordHash: hashedPasswordAdmin,
+      role: 'SUPER_ADMIN',
+      tenantId: systemTenant.id,
+      firstName: 'Super',
+      lastName: 'Admin',
+    },
+  });
+
   // 1. Beta Corp Tenant & User
   const betaTenant = await prisma.tenant.upsert({
     where: { slug: 'beta-corp' },
@@ -13,6 +42,7 @@ async function main() {
     create: {
       name: 'Beta Corp',
       slug: 'beta-corp',
+      status: 'ACTIVE',
     },
   });
 
@@ -38,6 +68,7 @@ async function main() {
     create: {
       name: 'Acme Corp',
       slug: 'acme-corp',
+      status: 'ACTIVE',
     },
   });
 

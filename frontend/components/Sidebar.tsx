@@ -1,19 +1,39 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user?.role === 'SUPER_ADMIN') {
+            setIsSuperAdmin(true);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, []);
 
   const navItems = [
     { name: 'Overview', path: '/dashboard' },
+    ...(isSuperAdmin ? [{ name: '👑 Tenant Management', path: '/dashboard/tenants' }] : []),
     { name: 'Merchants', path: '/dashboard/merchants' },
     { name: 'Transactions', path: '/dashboard/transactions' },
     { name: 'API Keys', path: '/dashboard/apikeys' },
     { name: 'User Management', path: '/dashboard/users' },
     { name: 'Reports', path: '/dashboard/reports' },
     { name: 'Audit Logs', path: '/dashboard/auditlogs' },
+    ...(isSuperAdmin ? [{ name: '⚙️ System Settings', path: '/dashboard/settings' }] : []),
   ];
 
   const handleLogout = () => {
@@ -26,8 +46,13 @@ export default function Sidebar() {
     <div className="w-64 bg-white shadow-md flex flex-col h-full border-r border-gray-100">
       <div className="p-6 pb-2">
         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <span>🛡️</span> Admin Panel
+          <span>{isSuperAdmin ? '⚡ Super Admin' : '🛡️ Admin Panel'}</span>
         </h2>
+        {isSuperAdmin && (
+          <span className="inline-block mt-1 px-2 py-0.5 text-[10px] bg-purple-100 text-purple-700 font-semibold rounded-full">
+            Global Master Access
+          </span>
+        )}
       </div>
       <nav className="mt-4 flex-1 space-y-1">
         {navItems.map((item) => {

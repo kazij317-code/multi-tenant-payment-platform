@@ -90,6 +90,35 @@ import { Role } from '@prisma/client';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  // ===== SUPER ADMIN GLOBAL USER ENDPOINTS =====
+  @Get('global')
+  @Roles(Role.SUPER_ADMIN)
+  async getAllUsersGlobal(@Query('search') search?: string) {
+    return this.usersService.getAllUsersGlobal(search);
+  }
+
+  @Patch('global/:id/role')
+  @Roles(Role.SUPER_ADMIN)
+  async updateUserRoleGlobal(
+    @Param('id') id: string,
+    @Body() body: { role: Role },
+    @Req() req: any,
+  ) {
+    const currentUserId = req.user.userId || req.user.sub || req.user.id;
+    return this.usersService.updateUserRoleGlobal(id, body.role, currentUserId);
+  }
+
+  @Patch('global/:id/status')
+  @Roles(Role.SUPER_ADMIN)
+  async toggleUserActiveGlobal(
+    @Param('id') id: string,
+    @Body() body: { isActive: boolean },
+    @Req() req: any,
+  ) {
+    const currentUserId = req.user.userId || req.user.sub || req.user.id;
+    return this.usersService.toggleUserActiveGlobal(id, body.isActive, currentUserId);
+  }
+
   @Post()
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
   async createUser(

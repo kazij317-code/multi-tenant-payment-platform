@@ -11,6 +11,7 @@ model Tenant {
   id        String   @id @default(uuid())
   name      String
   slug      String   @unique
+  status    String   @default("ACTIVE") // ACTIVE, SUSPENDED
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   apiKeys   ApiKey[] // এই লাইনটি যোগ করতে হবে
@@ -120,4 +121,20 @@ model ApiKey {
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model SystemConfig {
+  id                    String   @id @default("global")
+  defaultCurrency       String   @default("BDT")
+  platformFeePercentage Float    @default(1.5)
+  enableBkash           Boolean  @default(true)
+  enableNagad           Boolean  @default(true)
+  enableStripe          Boolean  @default(true)
+  maxLoginAttempts      Int      @default(5)
+  sessionTimeoutMinutes Int      @default(60)
+  require2FA            Boolean  @default(false)
+  maintenanceMode       Boolean  @default(false)
+  updatedAt             DateTime @updatedAt
+
+  @@map("system_configs")
 }

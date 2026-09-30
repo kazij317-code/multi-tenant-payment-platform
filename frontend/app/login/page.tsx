@@ -325,7 +325,11 @@ export default function LoginPage() {
       if (token) {
         localStorage.setItem('token', token);
       }
-      localStorage.setItem('user', JSON.stringify({ email, name: email.split('@')[0] }));
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      } else {
+        localStorage.setItem('user', JSON.stringify({ email, name: email.split('@')[0] }));
+      }
 
       router.push('/dashboard');
 
@@ -357,10 +361,27 @@ export default function LoginPage() {
           )}
 
           {/* Demo Credentials Card */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-4 text-xs space-y-2.5 shadow-sm">
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-4 text-xs space-y-3 shadow-sm">
+            <div className="flex justify-between items-center border-b border-indigo-100 pb-2">
+              <span className="font-semibold text-indigo-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <span>🔑</span> Super Admin Demo
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@platform.com');
+                  setTenantSlug('system');
+                  setPassword('SuperAdmin@123');
+                }}
+                className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-[11px] font-medium transition-colors shadow-xs"
+              >
+                Auto Fill Super Admin
+              </button>
+            </div>
+
             <div className="flex justify-between items-center">
               <span className="font-semibold text-indigo-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <span>🔑</span> Demo Credentials
+                <span>👤</span> Tenant Manager Demo
               </span>
               <button
                 type="button"
@@ -371,13 +392,8 @@ export default function LoginPage() {
                 }}
                 className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[11px] font-medium transition-colors shadow-xs"
               >
-                Auto Fill
+                Auto Fill Tenant
               </button>
-            </div>
-            <div className="space-y-1 text-slate-700 font-mono text-[11px] bg-white/60 p-2.5 rounded-lg border border-indigo-50">
-              <div><span className="text-gray-500 font-sans font-medium">Email:</span> manager@beta.com</div>
-              <div><span className="text-gray-500 font-sans font-medium">Tenant Slug:</span> beta-corp</div>
-              <div><span className="text-gray-500 font-sans font-medium">Password:</span> newpassword123</div>
             </div>
           </div>
 

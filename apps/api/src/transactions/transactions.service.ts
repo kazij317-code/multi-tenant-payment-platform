@@ -736,4 +736,25 @@ export class TransactionsService {
       transaction: updatedTransaction,
     };
   }
+
+  // ===== SUPER ADMIN GLOBAL TRANSACTIONS =====
+  async getTransactionsGlobal(status?: string, merchantId?: string) {
+    const whereClause: any = {};
+    if (status) whereClause.status = status;
+    if (merchantId) whereClause.merchantId = merchantId;
+
+    return this.prisma.transaction.findMany({
+      where: whereClause,
+      include: {
+        merchant: {
+          include: {
+            tenant: {
+              select: { name: true, slug: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

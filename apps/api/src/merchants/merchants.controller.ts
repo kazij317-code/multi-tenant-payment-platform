@@ -38,6 +38,24 @@ import { Role } from '@prisma/client';
 export class MerchantsController {
   constructor(private readonly merchantsService: MerchantsService) {}
 
+  // ===== SUPER ADMIN GLOBAL MERCHANTS =====
+  @Get('global')
+  @Roles(Role.SUPER_ADMIN)
+  async findAllGlobal() {
+    return this.merchantsService.getAllMerchantsGlobal();
+  }
+
+  @Patch('global/:id/status')
+  @Roles(Role.SUPER_ADMIN)
+  async updateStatusGlobal(
+    @Param('id') id: string,
+    @Body() body: { status: string },
+    @Req() req: any,
+  ) {
+    const userId = req.user.userId || req.user.sub || req.user.id;
+    return this.merchantsService.toggleMerchantStatusGlobal(id, body.status, userId);
+  }
+
   @Post()
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
   async create(@Body() body: { name: string; email: string }, @Req() req: any) {

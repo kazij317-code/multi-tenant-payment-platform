@@ -94,6 +94,13 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
+  @Get('global-summary')
+  @Roles(Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Get global system overview stats across all tenants (Super Admin only)' })
+  async getGlobalSummary() {
+    return this.reportsService.getGlobalSystemSummary();
+  }
+
   @Get('summary')
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR, Role.VIEWER)
   @ApiOperation({ summary: 'Get transaction summary and dashboard stats for tenant' })

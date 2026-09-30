@@ -666,4 +666,88 @@ export class UsersService {
 
     return { message: 'User deleted successfully' };
   }
+
+  // ===== SUPER ADMIN GLOBAL USER MANAGEMENT =====
+  async getAllUsersGlobal(search?: string) {
+    const whereClause: any = {};
+    if (search) {
+      whereClause.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    return this.prisma.user.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async updateUserRoleGlobal(userId: string, role: Role, currentUserId?: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: { id: true, email: true, role: true, isActive: true },
+    });
+
+    if (currentUserId) {
+      await this.auditLogsService.createLog({
+        action: 'SUPERADMIN_USER_ROLE_UPDATED',
+        userId: currentUserId,
+        tenantId: user.tenantId,
+        details: `Global User ${updated.email} role changed to ${role}.`,
+      });
+    }
+
+    return { message: 'User role updated successfully', user: updated };
+  }
+
+  async toggleUserActiveGlobal(userId: string, isActive: boolean, currentUserId?: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { isActive },
+      select: { id: true, email: true, role: true, isActive: true },
+    });
+
+    if (currentUserId) {
+      await this.auditLogsService.createLog({
+        action: isActive ? 'SUPERADMIN_USER_UNBLOCKED' : 'SUPERADMIN_USER_BLOCKED',
+        userId: currentUserId,
+        tenantId: user.tenantId,
+        details: `Global User ${updated.email} account ${isActive ? 'unblocked' : 'blocked'}.`,
+      });
+    }
+
+    return {
+      message: `User account ${isActive ? 'activated' : 'blocked'} successfully`,
+      user: updated,
+    };
+  }
 }

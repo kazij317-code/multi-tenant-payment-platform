@@ -4,16 +4,27 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('Audit Logs')
+@ApiBearerAuth()
 @Controller('audit-logs')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AuditLogsController {
   constructor(private readonly auditLogsService: AuditLogsService) {}
 
+  @Get('global')
+  @Roles(Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Get global audit logs across all tenants (Super Admin only)' })
+  async getGlobalLogs() {
+    return this.auditLogsService.getAllLogs();
+  }
+
   @Get()
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
+  @ApiOperation({ summary: 'Get audit logs for tenant' })
   async getLogs(@Req() req: any) {
-    const tenantId = req.user.tenantId; // টোকেন থেকে টিনেন্ট আইডি নেওয়া
+    const tenantId = req.user.tenantId;
     return this.auditLogsService.getLogsByTenant(tenantId);
   }
 }

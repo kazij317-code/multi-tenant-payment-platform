@@ -202,6 +202,12 @@ export class AuthService {
 
     return {
       message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        tenantId: tenant.id,
+      },
       ...tokens,
     };
   }

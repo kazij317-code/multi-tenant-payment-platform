@@ -147,4 +147,45 @@ export class MerchantsService {
       merchant: updatedMerchant,
     };
   }
+
+  // ===== SUPER ADMIN GLOBAL MERCHANTS =====
+  async getAllMerchantsGlobal() {
+    return this.prisma.merchant.findMany({
+      include: {
+        tenant: {
+          select: { name: true, slug: true },
+        },
+        _count: {
+          select: { transactions: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async toggleMerchantStatusGlobal(id: string, status: string, userId?: string) {
+    const merchant = await this.prisma.merchant.findUnique({ where: { id } });
+    if (!merchant) {
+      throw new NotFoundException('Merchant not found');
+    }
+
+    const updatedMerchant = await this.prisma.merchant.update({
+      where: { id },
+      data: { status },
+    });
+
+    if (userId) {
+      await this.auditLogsService.createLog({
+        action: 'SUPERADMIN_MERCHANT_STATUS_CHANGED',
+        userId: userId,
+        tenantId: merchant.tenantId,
+        details: `Merchant ${updatedMerchant.name} status changed to ${status} by Super Admin.`,
+      });
+    }
+
+    return {
+      message: `Merchant status updated to ${status} successfully`,
+      merchant: updatedMerchant,
+    };
+  }
 }

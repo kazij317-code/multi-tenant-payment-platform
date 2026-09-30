@@ -16,7 +16,17 @@ export class AuditLogsService {
   async getLogsByTenant(tenantId: string) {
     return this.prisma.auditLog.findMany({
       where: { tenantId },
+      include: { tenant: { select: { name: true, slug: true } } },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // সব টিনেন্টের গ্লোবাল অডিট লগ (সুপার অ্যাডমিনদের জন্য)
+  async getAllLogs() {
+    return this.prisma.auditLog.findMany({
+      include: { tenant: { select: { name: true, slug: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
     });
   }
 }

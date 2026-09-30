@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -11,6 +11,7 @@ export class TenantsService {
       data: {
         name,
         slug,
+        status: 'ACTIVE',
       },
     });
   }
@@ -19,8 +20,29 @@ export class TenantsService {
   async getAllTenants() {
     return this.prisma.tenant.findMany({
       include: {
-        users: true, // টিনেন্টের সাথে যুক্ত ইউজারদের তথ্যসহ দেখাবে
+        _count: {
+          select: {
+            users: true,
+            merchants: true,
+            auditLogs: true,
+          },
+        },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  // টিনেন্ট স্ট্যাটাস (ACTIVE / SUSPENDED) পরিবর্তন
+  async updateTenantStatus(id: string, status: string) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id } });
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+    return this.prisma.tenant.update({
+      where: { id },
+      data: { status },
     });
   }
 }

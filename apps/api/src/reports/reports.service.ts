@@ -143,6 +143,40 @@ import { Parser } from 'json2csv';
 export class ReportsService {
   constructor(private prisma: PrismaService) {}
 
+  // গ্লোবাল সিস্টেম ওভারভিউ (সুপার অ্যাডমিনদের জন্য)
+  async getGlobalSystemSummary() {
+    const totalTenants = await this.prisma.tenant.count();
+    const activeTenants = await this.prisma.tenant.count({ where: { status: 'ACTIVE' } });
+    const totalUsers = await this.prisma.user.count();
+    const totalTransactions = await this.prisma.transaction.count();
+
+    const transactions = await this.prisma.transaction.findMany({
+      select: { amount: true, status: true },
+    });
+
+    let totalVolume = 0;
+    let successfulVolume = 0;
+    transactions.forEach((tx) => {
+      totalVolume += tx.amount;
+      if (tx.status === 'SUCCESS') {
+        successfulVolume += tx.amount;
+      }
+    });
+
+    return {
+      message: 'Global system overview retrieved successfully',
+      summary: {
+        totalTenants,
+        activeTenants,
+        totalUsers,
+        totalTransactions,
+        totalVolume,
+        successfulVolume,
+        systemHealth: '100% Operational',
+      },
+    };
+  }
+
   // নির্দিষ্ট টিনেন্টের ড্যাশবোর্ড সামারি তৈরি করা
   async getTransactionSummary(tenantId: string) {
     // ১. মোট মার্চেন্ট ও এপিআই কি সংখ্যা

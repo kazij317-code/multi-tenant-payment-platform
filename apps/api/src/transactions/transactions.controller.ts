@@ -151,6 +151,16 @@ export class TransactionsController {
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Get('global')
+  @Roles(Role.SUPER_ADMIN)
+  async findAllGlobal(
+    @Query('status') status?: string,
+    @Query('merchantId') merchantId?: string,
+  ) {
+    return this.transactionsService.getTransactionsGlobal(status, merchantId);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async create(
