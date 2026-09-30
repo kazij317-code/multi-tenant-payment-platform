@@ -71,6 +71,14 @@ export class MerchantsController {
     return this.merchantsService.getMerchantsByTenant(tenantId);
   }
 
+  @Get(':id')
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.VIEWER)
+  async getProfile(@Param('id') id: string, @Req() req: any) {
+    const isSuper = req.user.role === Role.SUPER_ADMIN;
+    const tenantId = isSuper ? undefined : req.user.tenantId;
+    return this.merchantsService.getMerchantProfile(id, tenantId);
+  }
+
   @Patch(':id')
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
   async update(

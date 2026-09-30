@@ -188,4 +188,30 @@ export class MerchantsService {
       merchant: updatedMerchant,
     };
   }
+
+  // মার্চেন্ট প্রোফাইল ফেচ করার মেথড
+  async getMerchantProfile(id: string, tenantId?: string) {
+    const whereClause: any = { id };
+    if (tenantId) whereClause.tenantId = tenantId;
+
+    const merchant = await this.prisma.merchant.findFirst({
+      where: whereClause,
+      include: {
+        tenant: { select: { name: true, slug: true } },
+        transactions: {
+          take: 10,
+          orderBy: { createdAt: 'desc' },
+        },
+        _count: {
+          select: { transactions: true },
+        },
+      },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException('Merchant not found');
+    }
+
+    return merchant;
+  }
 }
