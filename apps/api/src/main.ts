@@ -24,10 +24,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
+  // সিকিউর হেডার্স (Secure Headers, XSS Protection & CSP)
+  app.use(helmet({ contentSecurityPolicy: false }));
+
   // CORS এনাবল করা
   app.enableCors({
     origin: 'http://localhost:3000',

@@ -101,11 +101,17 @@ The system features robust role-based access control (RBAC) spanning 5 hierarchi
 - Tracks: Login (`USER_LOGIN`), Logout (`USER_LOGOUT`), User Creation (`USER_CREATED`), Role Changes (`SUPERADMIN_USER_ROLE_UPDATED`, `USER_UPDATED`), Transaction Actions (`TRANSACTION_CREATED`, `TRANSACTION_APPROVED`, `TRANSACTION_REJECTED`, `TRANSACTION_REFUNDED`).
 - Enriched User Data: Includes User Email, Name, Role, Tenant Name, and exact Timestamp.
 
-### 10. Technical Requirements & Security
-- **Global Error Handling**: `AllExceptionsFilter` catching all exceptions and formatting into consistent JSON response (`statusCode`, `timestamp`, `path`, `method`, `message`).
-- **Structured Logging**: `LoggingInterceptor` logging HTTP Method, Path, Status Code, IP, User Agent, Execution Delay (ms).
-- **DTO Validation**: NestJS `ValidationPipe` with whitelist and auto-transform.
-- **Swagger OpenAPIs**: Interactive live API documentation at `http://localhost:5000/api-docs`.
+### 10. Technical Requirements & Security Implementation
+- **Password Hashing**: `bcrypt` salt-hashed passwords for secure user credential storage.
+- **JWT Security**: Access Tokens (15m) + Database Hashed Refresh Tokens (7d) with `PassportJwtStrategy`.
+- **Rate Limiting**: NestJS `@nestjs/throttler` (`ThrottlerGuard`) limiting requests to prevent brute force and DoS attacks.
+- **Input Validation**: Global `ValidationPipe` with DTO whitelist, forbidNonWhitelisted fields, and type auto-transformation.
+- **SQL Injection Protection**: Prisma ORM parameterized SQL queries preventing any SQL injection attacks.
+- **XSS Protection & Secure Headers**: Integrated `helmet` middleware configuring HTTP security headers (X-Frame-Options, X-XSS-Protection, X-Content-Type-Options, HSTS).
+- **Environment Variables**: Managed via `.env` configuration files for database connection string, JWT secrets, and ports.
+- **Global Error Handling**: `AllExceptionsFilter` formatting errors into structured JSON responses (`statusCode`, `timestamp`, `path`, `method`, `message`).
+- **Structured Logging**: `LoggingInterceptor` capturing HTTP Method, Path, Status Code, IP, User Agent, Execution Delay (ms).
+- **Swagger Documentation**: Live interactive API docs at `http://localhost:5000/api-docs`.
 
 ---
 
