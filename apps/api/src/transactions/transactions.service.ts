@@ -533,10 +533,11 @@ export class TransactionsService {
       currency?: string;
       reference: string;
       merchantId: string;
-      status?: 'SUCCESS' | 'PENDING' | 'FAILED' | 'APPROVED' | 'REJECTED' | 'REFUNDED' | 'PROCESSING' | 'COMPLETED';
+      paymentMethod?: string;
+      status?: string;
     },
     tenantId: string,
-    userId?: string, // অপশনাল ইউজার আইডি
+    userId?: string,
   ) {
     const merchant = await this.prisma.merchant.findFirst({
       where: {
@@ -563,7 +564,9 @@ export class TransactionsService {
         currency: dto.currency || 'BDT',
         status: dto.status || 'PENDING',
         reference: dto.reference,
+        paymentMethod: dto.paymentMethod || 'bKash',
         merchantId: dto.merchantId,
+        createdById: userId || null,
       },
     });
 
@@ -576,21 +579,29 @@ export class TransactionsService {
   // নির্দিষ্ট টিনেন্টের ট্রানজেকশন লিস্ট ও ফিল্টারিং
   async getTransactionsByTenant(
     tenantId: string,
-    status?: 'SUCCESS' | 'PENDING' | 'FAILED' | 'APPROVED' | 'REJECTED' | 'REFUNDED',
+    status?: string,
     merchantId?: string,
+    paymentMethod?: string,
+    search?: string,
   ) {
+    const whereClause: any = {
+      merchant: { tenantId },
+    };
+
+    if (status) whereClause.status = status;
+    if (merchantId) whereClause.merchantId = merchantId;
+    if (paymentMethod) whereClause.paymentMethod = paymentMethod;
+    if (search) {
+      whereClause.OR = [
+        { reference: { contains: search, mode: 'insensitive' } },
+        { merchant: { name: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
     return this.prisma.transaction.findMany({
-      where: {
-        merchant: {
-          tenantId: tenantId,
-        },
-        ...(status && { status }),
-        ...(merchantId && { merchantId }),
-      },
+      where: whereClause,
       include: {
-        merchant: {
-          select: { id: true, name: true, email: true },
-        },
+        merchant: { select: { id: true, name: true, email: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -612,7 +623,7 @@ export class TransactionsService {
 
     const updatedTransaction = await this.prisma.transaction.update({
       where: { id: transactionId },
-      data: { status: 'SUCCESS' },
+      data: { status: 'COMPLETED' },
     });
 
     // ইন-অ্যাপ নোটিফিকেশন
@@ -625,7 +636,7 @@ export class TransactionsService {
 
     // ইমেল নোটিফিকেশন
     const userEmail = transaction.merchant?.email || 'admin@example.com'; 
-    await this.mailService.sendTransactionEmail(userEmail, transaction.reference, 'SUCCESS');
+    await this.mailService.sendTransactionEmail(userEmail, transaction.reference, 'COMPLETED');
 
     // অডিট লগ রেকর্ড করা
     if (userId) {
@@ -690,8 +701,8 @@ export class TransactionsService {
       throw new NotFoundException('Transaction not found or does not belong to this tenant');
     }
 
-    if (transaction.status !== 'SUCCESS') {
-      throw new BadRequestException('Only successful transactions can be refunded');
+    if (transaction.status !== 'SUCCESS' && transaction.status !== 'COMPLETED') {
+      throw new BadRequestException('Only completed transactions can be refunded');
     }
 
     const updatedTransaction = await this.prisma.transaction.update({
@@ -716,7 +727,7 @@ export class TransactionsService {
   }
 
   // পেমেন্ট গেটওয়ে ওয়েবহুক হ্যান্ডেল করা
-  async handlePaymentWebhook(dto: { reference: string; status: 'SUCCESS' | 'PENDING' | 'FAILED' }) {
+  async handlePaymentWebhook(dto: { reference: string; status: 'SUCCESS' | 'COMPLETED' | 'PENDING' | 'FAILED' }) {
     const transaction = await this.prisma.transaction.findUnique({
       where: { reference: dto.reference },
     });
@@ -738,10 +749,17 @@ export class TransactionsService {
   }
 
   // ===== SUPER ADMIN GLOBAL TRANSACTIONS =====
-  async getTransactionsGlobal(status?: string, merchantId?: string) {
+  async getTransactionsGlobal(status?: string, merchantId?: string, paymentMethod?: string, search?: string) {
     const whereClause: any = {};
     if (status) whereClause.status = status;
     if (merchantId) whereClause.merchantId = merchantId;
+    if (paymentMethod) whereClause.paymentMethod = paymentMethod;
+    if (search) {
+      whereClause.OR = [
+        { reference: { contains: search, mode: 'insensitive' } },
+        { merchant: { name: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
 
     return this.prisma.transaction.findMany({
       where: whereClause,

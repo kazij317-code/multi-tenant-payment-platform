@@ -156,15 +156,17 @@ export class TransactionsController {
   async findAllGlobal(
     @Query('status') status?: string,
     @Query('merchantId') merchantId?: string,
+    @Query('paymentMethod') paymentMethod?: string,
+    @Query('search') search?: string,
   ) {
-    return this.transactionsService.getTransactionsGlobal(status, merchantId);
+    return this.transactionsService.getTransactionsGlobal(status, merchantId, paymentMethod, search);
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async create(
-    @Body() body: { amount: number; currency?: string; reference: string; merchantId: string; status?: any },
+    @Body() body: { amount: number; currency?: string; reference: string; merchantId: string; paymentMethod?: string; status?: any },
     @Req() req: any,
   ) {
     const tenantId = req.user.tenantId;
@@ -178,10 +180,12 @@ export class TransactionsController {
   async findAll(
     @Query('status') status?: any,
     @Query('merchantId') merchantId?: string,
+    @Query('paymentMethod') paymentMethod?: string,
+    @Query('search') search?: string,
     @Req() req?: any,
   ) {
     const tenantId = req.user.tenantId;
-    return this.transactionsService.getTransactionsByTenant(tenantId, status, merchantId);
+    return this.transactionsService.getTransactionsByTenant(tenantId, status, merchantId, paymentMethod, search);
   }
 
   // ট্রানজেকশন অ্যাপ্রুভ রাউট
