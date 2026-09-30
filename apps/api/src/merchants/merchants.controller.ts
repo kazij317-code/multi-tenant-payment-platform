@@ -42,7 +42,8 @@ export class MerchantsController {
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
   async create(@Body() body: { name: string; email: string }, @Req() req: any) {
     const tenantId = req.user.tenantId;
-    return this.merchantsService.createMerchant(body, tenantId);
+    const userId = req.user.userId || req.user.sub || req.user.id;
+    return this.merchantsService.createMerchant(body, tenantId, userId);
   }
 
   @Get()
@@ -60,7 +61,8 @@ export class MerchantsController {
     @Req() req: any,
   ) {
     const tenantId = req.user.tenantId;
-    return this.merchantsService.updateMerchant(id, body, tenantId);
+    const userId = req.user.userId || req.user.sub || req.user.id;
+    return this.merchantsService.updateMerchant(id, body, tenantId, userId);
   }
 
   @Patch(':id/status')
@@ -71,6 +73,7 @@ export class MerchantsController {
     @Req() req: any,
   ) {
     const tenantId = req.user.tenantId;
-    return this.merchantsService.toggleMerchantStatus(id, body.status, tenantId);
+    const userId = req.user.userId || req.user.sub || req.user.id;
+    return this.merchantsService.toggleMerchantStatus(id, body.status, tenantId, userId);
   }
 }

@@ -145,8 +145,12 @@ export class ReportsService {
 
   // নির্দিষ্ট টিনেন্টের ড্যাশবোর্ড সামারি তৈরি করা
   async getTransactionSummary(tenantId: string) {
-    // ১. মোট মার্চেন্ট সংখ্যা
+    // ১. মোট মার্চেন্ট ও এপিআই কি সংখ্যা
     const totalMerchants = await this.prisma.merchant.count({
+      where: { tenantId },
+    });
+
+    const activeApiKeys = await this.prisma.apiKey.count({
       where: { tenantId },
     });
 
@@ -191,6 +195,7 @@ export class ReportsService {
         totalTransactions,
         totalVolume,
         successfulVolume,
+        activeApiKeys,
         statusBreakdown: {
           success: successfulCount,
           pending: pendingCount,

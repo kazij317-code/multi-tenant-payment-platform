@@ -126,13 +126,15 @@ export class UsersController {
     @Req() req: any,
   ) {
     const tenantId = req.user.tenantId;
-    return this.usersService.updateUser(id, body, tenantId);
+    const currentUserId = req.user.userId || req.user.sub || req.user.id;
+    return this.usersService.updateUser(id, body, tenantId, currentUserId);
   }
 
   @Delete(':id')
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
   async deleteUser(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
-    return this.usersService.deleteUser(id, tenantId);
+    const currentUserId = req.user.userId || req.user.sub || req.user.id;
+    return this.usersService.deleteUser(id, tenantId, currentUserId);
   }
 }

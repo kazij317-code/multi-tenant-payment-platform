@@ -158,7 +158,8 @@ export class TransactionsController {
     @Req() req: any,
   ) {
     const tenantId = req.user.tenantId;
-    return this.transactionsService.createTransaction(body, tenantId);
+    const userId = req.user.userId || req.user.sub || req.user.id;
+    return this.transactionsService.createTransaction(body, tenantId, userId);
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -179,7 +180,8 @@ export class TransactionsController {
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
   async approve(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
-    return this.transactionsService.approveTransaction(id, tenantId);
+    const userId = req.user.userId || req.user.sub || req.user.id;
+    return this.transactionsService.approveTransaction(id, tenantId, userId);
   }
 
   // ট্রানজেকশন রিজেক্ট রাউট
@@ -188,7 +190,8 @@ export class TransactionsController {
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
   async reject(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
-    return this.transactionsService.rejectTransaction(id, tenantId);
+    const userId = req.user.userId || req.user.sub || req.user.id;
+    return this.transactionsService.rejectTransaction(id, tenantId, userId);
   }
 
   // ট্রানজেকশন রিফান্ড রাউট
@@ -197,6 +200,7 @@ export class TransactionsController {
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
   async refund(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
-    return this.transactionsService.refundTransaction(id, tenantId);
+    const userId = req.user.userId || req.user.sub || req.user.id;
+    return this.transactionsService.refundTransaction(id, tenantId, userId);
   }
 }

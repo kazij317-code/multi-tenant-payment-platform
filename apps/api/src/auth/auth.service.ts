@@ -92,6 +92,7 @@ import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service'; // আপনার প্রজেক্টের পাথ অনুযায়ী ঠিক করে নেবেন
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -100,6 +101,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private mailService: MailService, // MailService ইঞ্জেক্ট করা হলো
+    private auditLogsService: AuditLogsService,
   ) {}
 
   // টোকেন জেনারেট করার হেল্পার মেথড
@@ -147,6 +149,13 @@ export class AuthService {
       },
     });
 
+    await this.auditLogsService.createLog({
+      action: 'USER_REGISTERED',
+      userId: user.id,
+      tenantId: tenant.id,
+      details: `User ${user.email} registered.`,
+    });
+
     return {
       message: 'User registered successfully',
       userId: user.id,
@@ -183,6 +192,13 @@ export class AuthService {
 
     const tokens = await this.getTokens(user.id, user.email, tenant.id, user.role);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+    await this.auditLogsService.createLog({
+      action: 'USER_LOGIN',
+      userId: user.id,
+      tenantId: tenant.id,
+      details: `User ${user.email} logged in.`,
+    });
 
     return {
       message: 'Login successful',

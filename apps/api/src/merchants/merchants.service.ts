@@ -35,13 +35,17 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
 export class MerchantsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private auditLogsService: AuditLogsService,
+  ) {}
 
   // নতুন মার্চেন্ট তৈরি (নির্দিষ্ট টিনেন্টের অধীনে)
-  async createMerchant(dto: { name: string; email: string }, tenantId: string) {
+  async createMerchant(dto: { name: string; email: string }, tenantId: string, userId?: string) {
     const merchant = await this.prisma.merchant.create({
       data: {
         name: dto.name,
@@ -50,6 +54,15 @@ export class MerchantsService {
         status: 'ACTIVE',
       },
     });
+
+    if (userId) {
+      await this.auditLogsService.createLog({
+        action: 'MERCHANT_CREATED',
+        userId: userId,
+        tenantId: tenantId,
+        details: `Merchant ${merchant.name} (${merchant.email}) created.`,
+      });
+    }
 
     return {
       message: 'Merchant created successfully',
@@ -75,6 +88,7 @@ export class MerchantsService {
     id: string,
     dto: { name?: string; email?: string; status?: string },
     tenantId: string,
+    userId?: string,
   ) {
     const merchant = await this.prisma.merchant.findFirst({
       where: { id, tenantId },
@@ -89,6 +103,15 @@ export class MerchantsService {
       data: dto,
     });
 
+    if (userId) {
+      await this.auditLogsService.createLog({
+        action: 'MERCHANT_UPDATED',
+        userId: userId,
+        tenantId: tenantId,
+        details: `Merchant ${updatedMerchant.name} details updated.`,
+      });
+    }
+
     return {
       message: 'Merchant updated successfully',
       merchant: updatedMerchant,
@@ -96,7 +119,7 @@ export class MerchantsService {
   }
 
   // মার্চেন্ট অ্যাক্টিভ বা সাসপেন্ড করা
-  async toggleMerchantStatus(id: string, status: string, tenantId: string) {
+  async toggleMerchantStatus(id: string, status: string, tenantId: string, userId?: string) {
     const merchant = await this.prisma.merchant.findFirst({
       where: { id, tenantId },
     });
@@ -109,6 +132,15 @@ export class MerchantsService {
       where: { id },
       data: { status },
     });
+
+    if (userId) {
+      await this.auditLogsService.createLog({
+        action: 'MERCHANT_STATUS_CHANGED',
+        userId: userId,
+        tenantId: tenantId,
+        details: `Merchant ${updatedMerchant.name} status changed to ${status}.`,
+      });
+    }
 
     return {
       message: `Merchant status updated to ${status} successfully`,

@@ -95,7 +95,7 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Get('summary')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR, Role.VIEWER)
   @ApiOperation({ summary: 'Get transaction summary and dashboard stats for tenant' })
   async getSummary(@Req() req: any) {
     const tenantId = req.user.tenantId;

@@ -607,6 +607,7 @@ export class UsersService {
     userId: string,
     dto: { email?: string; role?: Role },
     tenantId: string,
+    currentUserId?: string,
   ) {
     const user = await this.prisma.user.findFirst({
       where: { id: userId, tenantId },
@@ -627,6 +628,15 @@ export class UsersService {
       },
     });
 
+    if (currentUserId) {
+      await this.auditLogsService.createLog({
+        action: 'USER_UPDATED',
+        userId: currentUserId,
+        tenantId: tenantId,
+        details: `User ${updatedUser.email} updated (Role: ${updatedUser.role}).`,
+      });
+    }
+
     return {
       message: 'User updated successfully',
       user: updatedUser,
@@ -634,7 +644,7 @@ export class UsersService {
   }
 
   // নির্দিষ্ট ইউজার ডিলিট করা
-  async deleteUser(id: string, tenantId: string) {
+  async deleteUser(id: string, tenantId: string, currentUserId?: string) {
     const user = await this.prisma.user.findFirst({
       where: { id, tenantId },
     });
@@ -644,6 +654,16 @@ export class UsersService {
     }
 
     await this.prisma.user.delete({ where: { id } });
+
+    if (currentUserId) {
+      await this.auditLogsService.createLog({
+        action: 'USER_DELETED',
+        userId: currentUserId,
+        tenantId: tenantId,
+        details: `User ${user.email} deleted.`,
+      });
+    }
+
     return { message: 'User deleted successfully' };
   }
 }

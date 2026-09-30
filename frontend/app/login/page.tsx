@@ -356,6 +356,31 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Demo Credentials Card */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-4 text-xs space-y-2.5 shadow-sm">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold text-indigo-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <span>🔑</span> Demo Credentials
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('manager@beta.com');
+                  setTenantSlug('beta-corp');
+                  setPassword('newpassword123');
+                }}
+                className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[11px] font-medium transition-colors shadow-xs"
+              >
+                Auto Fill
+              </button>
+            </div>
+            <div className="space-y-1 text-slate-700 font-mono text-[11px] bg-white/60 p-2.5 rounded-lg border border-indigo-50">
+              <div><span className="text-gray-500 font-sans font-medium">Email:</span> manager@beta.com</div>
+              <div><span className="text-gray-500 font-sans font-medium">Tenant Slug:</span> beta-corp</div>
+              <div><span className="text-gray-500 font-sans font-medium">Password:</span> newpassword123</div>
+            </div>
+          </div>
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4 rounded-md shadow-sm">
               <div>
