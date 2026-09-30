@@ -570,6 +570,16 @@ export class TransactionsService {
       },
     });
 
+    // অডিট লগ সেভ করা
+    if (userId) {
+      await this.auditLogsService.createLog({
+        action: 'TRANSACTION_CREATED',
+        userId: userId,
+        tenantId: tenantId,
+        details: `Transaction ${transaction.reference} created for ${transaction.amount} ${transaction.currency} (${transaction.status}).`,
+      });
+    }
+
     // ইন-অ্যাপ নোটিফিকেশন: Transaction Created
     await this.notificationsService.createNotification({
       title: 'Transaction Created',

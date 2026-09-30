@@ -22,8 +22,8 @@ import { SystemConfigModule } from './system-config/system-config.module';
   imports: [
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // সময় মিলিিসেকেন্ডে (এখানে ৬০ সেকেন্ড বা ১ মিনিট)
-        limit: 10,  // এই সময়ের মধ্যে সর্বোচ্চ কয়টি রিকোয়েস্ট করা যাবে
+        ttl: 60000, // ১ মিনিট (৬০,০০০ মি.সে.)
+        limit: 100, // ১ মিনিটে সর্বোচ্চ ১০০টি রিকোয়েস্ট
       },
     ]),
     PrismaModule, TenantsModule, AuthModule, MerchantsModule, TransactionsModule, UsersModule, AuditLogsModule, ReportsModule, PaymentsModule, WebhooksModule, NotificationsModule, MailModule, ApiKeysModule, SystemConfigModule], // এখানে যুক্ত করো

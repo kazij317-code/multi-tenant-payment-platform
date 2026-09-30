@@ -14,19 +14,43 @@ export class AuditLogsService {
 
   // নির্দিষ্ট টিনেন্টের সব অডিট লগ দেখার ফাংশন
   async getLogsByTenant(tenantId: string) {
-    return this.prisma.auditLog.findMany({
+    const logs = await this.prisma.auditLog.findMany({
       where: { tenantId },
       include: { tenant: { select: { name: true, slug: true } } },
       orderBy: { createdAt: 'desc' },
     });
+
+    const userIds = Array.from(new Set(logs.map((l) => l.userId).filter(Boolean)));
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true },
+    });
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    return logs.map((log) => ({
+      ...log,
+      user: userMap.get(log.userId) || { email: 'Unknown / System' },
+    }));
   }
 
   // সব টিনেন্টের গ্লোবাল অডিট লগ (সুপার অ্যাডমিনদের জন্য)
   async getAllLogs() {
-    return this.prisma.auditLog.findMany({
+    const logs = await this.prisma.auditLog.findMany({
       include: { tenant: { select: { name: true, slug: true } } },
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
+
+    const userIds = Array.from(new Set(logs.map((l) => l.userId).filter(Boolean)));
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true },
+    });
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    return logs.map((log) => ({
+      ...log,
+      user: userMap.get(log.userId) || { email: 'Unknown / System' },
+    }));
   }
 }

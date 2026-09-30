@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import API from '@/services/api';
 
 export default function UserMenu() {
   const router = useRouter();
@@ -39,12 +40,18 @@ export default function UserMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    setDropdownOpen(false);
-    router.push('/');
+  const handleLogout = async () => {
+    try {
+      await API.post('/auth/logout');
+    } catch (e) {
+      console.error('Logout error', e);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      setDropdownOpen(false);
+      router.push('/');
+    }
   };
 
   const getUserDisplayName = () => {

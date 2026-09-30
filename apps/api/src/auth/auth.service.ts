@@ -228,10 +228,22 @@ export class AuthService {
 
   // লগআউট (রিফ্রেশ টোকেন রিমুভ করা)
   async logout(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshTokenHash: null },
     });
+
+    if (user) {
+      await this.auditLogsService.createLog({
+        action: 'USER_LOGOUT',
+        userId: user.id,
+        tenantId: user.tenantId,
+        details: `User ${user.email} logged out.`,
+      });
+    }
+
     return { message: 'Logged out successfully' };
   }
 

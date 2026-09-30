@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import API from '@/services/api';
+import { ShieldCheck, User, Clock, Building2, RefreshCw } from 'lucide-react';
 
 export default function AuditLogsPage() {
   const [auditLogs, setAuditLogs] = useState([]);
@@ -40,59 +41,122 @@ export default function AuditLogsPage() {
     }
   };
 
+  const getActionBadge = (action: string) => {
+    switch (action) {
+      case 'USER_LOGIN':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'USER_LOGOUT':
+        return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'USER_CREATED':
+      case 'USER_REGISTERED':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'USER_UPDATED':
+      case 'SUPERADMIN_USER_ROLE_UPDATED':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'USER_DELETED':
+      case 'TRANSACTION_REJECTED':
+        return 'bg-rose-100 text-rose-800 border-rose-200';
+      case 'TRANSACTION_APPROVED':
+      case 'TRANSACTION_CREATED':
+        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      default:
+        return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 max-w-full">
+      {/* Header & Refresh */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h3 className="text-xl font-bold text-gray-900">
-            {isSuperAdmin ? '⚡ System-wide Audit Logs (Global)' : 'Audit Logs'}
-          </h3>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <ShieldCheck className="w-6 h-6 text-indigo-600 shrink-0" />
+            <span>{isSuperAdmin ? '⚡ System Audit Logs (Global)' : 'Audit Logs'}</span>
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
             {isSuperAdmin
-              ? 'Track critical actions and security events across all platform tenants.'
-              : 'Track all critical actions and activities within your tenant.'}
+              ? 'Real-time security events, user logins, logouts, role changes, and system operations across all platform tenants.'
+              : 'Track login, logout, user creation, role changes, and transaction activities in your workspace.'}
           </p>
         </div>
+
+        <button
+          onClick={() => fetchAuditLogs(isSuperAdmin)}
+          className="inline-flex items-center justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-all gap-2 cursor-pointer shrink-0"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh Logs
+        </button>
       </div>
 
-      {loading ? (
-        <p className="text-sm text-gray-500">Loading audit logs...</p>
-      ) : auditLogs.length === 0 ? (
-        <p className="text-sm text-gray-500">No audit logs found.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Action</th>
-                {isSuperAdmin && (
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tenant</th>
-                )}
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Details</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User ID</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Timestamp</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {auditLogs.map((log: any) => (
-                <tr key={log.id} className="hover:bg-gray-50/80 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-purple-600">{log.action}</td>
-                  {isSuperAdmin && (
-                    <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-700">
-                      {log.tenant?.name || log.tenant?.slug || log.tenantId}
-                    </td>
-                  )}
-                  <td className="px-6 py-4 text-sm text-gray-900">{log.details}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-500">{log.userId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                    {new Date(log.createdAt).toLocaleString()}
-                  </td>
+      {/* Logs Table Wrapper */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center text-slate-500">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-3"></div>
+            <p className="text-sm font-medium">Fetching Audit Trails...</p>
+          </div>
+        ) : auditLogs.length === 0 ? (
+          <div className="p-12 text-center text-slate-500">
+            <p className="text-sm">No audit logs recorded yet.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto w-full">
+            <table className="min-w-full text-left text-xs">
+              <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                <tr>
+                  <th className="px-4 py-3.5 whitespace-nowrap">Action Event</th>
+                  <th className="px-4 py-3.5 whitespace-nowrap">User</th>
+                  {isSuperAdmin && <th className="px-4 py-3.5 whitespace-nowrap">Tenant</th>}
+                  <th className="px-4 py-3.5">Details</th>
+                  <th className="px-4 py-3.5 whitespace-nowrap text-right">Timestamp</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {auditLogs.map((log: any) => (
+                  <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <span className={`inline-block px-2.5 py-1 text-[11px] font-bold rounded-md border ${getActionBadge(log.action)}`}>
+                        {log.action}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <User className="w-4 h-4 text-slate-400 shrink-0" />
+                        <div>
+                          <p className="font-semibold text-slate-900">{log.user?.email || 'System User'}</p>
+                          <p className="text-[10px] font-mono text-slate-400">{log.userId ? `${log.userId.slice(0, 8)}...` : 'N/A'}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {isSuperAdmin && (
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="flex items-center space-x-1.5 text-slate-700 font-medium">
+                          <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{log.tenant?.name || log.tenant?.slug || log.tenantId || 'System'}</span>
+                        </div>
+                      </td>
+                    )}
+
+                    <td className="px-4 py-3.5 text-slate-800 max-w-xs sm:max-w-md break-words font-medium">
+                      {log.details || 'N/A'}
+                    </td>
+
+                    <td className="px-4 py-3.5 whitespace-nowrap text-right">
+                      <div className="inline-flex items-center space-x-1.5 font-mono text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>{new Date(log.createdAt).toLocaleString()}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

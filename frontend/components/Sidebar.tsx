@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import API from '@/services/api';
 
 export default function Sidebar() {
   const router = useRouter();
@@ -36,10 +37,16 @@ export default function Sidebar() {
     ...(isSuperAdmin ? [{ name: '⚙️ System Settings', path: '/dashboard/settings' }] : []),
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    router.push('/');
+  const handleLogout = async () => {
+    try {
+      await API.post('/auth/logout');
+    } catch (e) {
+      console.error('Logout error', e);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      router.push('/');
+    }
   };
 
   return (
