@@ -1,140 +1,3 @@
-// // // import { Injectable } from '@nestjs/common';
-// // // import { PrismaService } from '../prisma/prisma.service';
-
-// // // @Injectable()
-// // // export class ReportsService {
-// // //   constructor(private prisma: PrismaService) {}
-
-// // //   async getTransactionSummary(tenantId: string) {
-// // //     // মোট ট্রানজেকশন সংখ্যা
-// // //     const totalTransactions = await this.prisma.transaction.count({
-// // //       where: { tenantId },
-// // //     });
-
-// // //     // সফল ট্রানজেকশনের মোট পরিমাণ (রেভিনিউ)
-// // //     const successfulRevenue = await this.prisma.transaction.aggregate({
-// // //       where: { 
-// // //         tenantId, 
-// // //         status: 'SUCCESS' // ধরে নিচ্ছি ট্রানজেকশন স্ট্যাটাস 'SUCCESS'
-// // //       },
-// // //       _sum: {
-// // //         amount: true,
-// // //       },
-// // //     });
-
-// // //     return {
-// // //       totalTransactions,
-// // //       totalRevenue: successfulRevenue._sum.amount || 0,
-// // //     };
-// // //   }
-// // // }
-// // // -----------------------
-
-// // import { Injectable } from '@nestjs/common';
-// // import { PrismaService } from '../prisma/prisma.service';
-
-// // @Injectable()
-// // export class ReportsService {
-// //   constructor(private prisma: PrismaService) {}
-
-// //   async getTransactionSummary(tenantId: string) {
-// //     // নির্দিষ্ট টিনেন্টের সব মার্চেন্টের অধীনে থাকা ট্রানজেকশন গণনা করা
-// //     const totalTransactions = await this.prisma.transaction.count({
-// //       where: {
-// //         merchant: {
-// //           tenantId: tenantId,
-// //         },
-// //       },
-// //     });
-
-// //     // সফল ট্রানজেকশনের মোট পরিমাণ (রেভিনিউ) হিসাব করা
-// //     const successfulRevenue = await this.prisma.transaction.aggregate({
-// //       where: {
-// //         status: 'SUCCESS',
-// //         merchant: {
-// //           tenantId: tenantId,
-// //         },
-// //       },
-// //       _sum: {
-// //         amount: true,
-// //       },
-// //     });
-
-// //     return {
-// //       totalTransactions,
-// //       totalRevenue: successfulRevenue._sum.amount || 0,
-// //     };
-// //   }
-// // }
-
-// // ---------------
-
-// import { Injectable } from '@nestjs/common';
-// import { PrismaService } from '../prisma/prisma.service';
-
-// @Injectable()
-// export class ReportsService {
-//   constructor(private prisma: PrismaService) {}
-
-//   // নির্দিষ্ট টিনেন্টের ড্যাশবোর্ড সামারি তৈরি করা
-//   async getTransactionSummary(tenantId: string) {
-//     // ১. মোট মার্চেন্ট সংখ্যা
-//     const totalMerchants = await this.prisma.merchant.count({
-//       where: { tenantId },
-//     });
-
-//     // ২. এই টিনেন্টের অধীনে থাকা সব ট্রানজেকশন ফেচ করা
-//     const transactions = await this.prisma.transaction.findMany({
-//       where: {
-//         merchant: {
-//           tenantId: tenantId,
-//         },
-//       },
-//       select: {
-//         amount: true,
-//         status: true,
-//       },
-//     });
-
-//     const totalTransactions = transactions.length;
-//     let totalVolume = 0;
-//     let successfulVolume = 0;
-//     let successfulCount = 0;
-//     let pendingCount = 0;
-//     let failedCount = 0;
-
-//     // ট্রানজেকশনগুলোর ওপর লুপ চালিয়ে সামারি ক্যালকুলেট করা
-//     transactions.forEach((tx) => {
-//       totalVolume += tx.amount;
-
-//       if (tx.status === 'SUCCESS') {
-//         successfulVolume += tx.amount;
-//         successfulCount++;
-//       } else if (tx.status === 'PENDING') {
-//         pendingCount++;
-//       } else if (tx.status === 'FAILED') {
-//         failedCount++;
-//       }
-//     });
-
-//     return {
-//       message: 'Dashboard summary retrieved successfully',
-//       summary: {
-//         totalMerchants,
-//         totalTransactions,
-//         totalVolume,
-//         successfulVolume,
-//         statusBreakdown: {
-//           success: successfulCount,
-//           pending: pendingCount,
-//           failed: failedCount,
-//         },
-//       },
-//     };
-//   }
-// }
-
-// --------------------
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Parser } from 'json2csv';
@@ -147,40 +10,79 @@ export class ReportsService {
   async getGlobalSystemSummary() {
     const totalTenants = await this.prisma.tenant.count();
     const activeTenants = await this.prisma.tenant.count({ where: { status: 'ACTIVE' } });
+    const totalMerchants = await this.prisma.merchant.count();
     const totalUsers = await this.prisma.user.count();
     const totalTransactions = await this.prisma.transaction.count();
 
-    const transactions = await this.prisma.transaction.findMany({
-      select: { amount: true, status: true },
+    const failedTransactions = await this.prisma.transaction.count({
+      where: {
+        OR: [{ status: 'FAILED' }, { status: 'REJECTED' }],
+      },
     });
 
-    let totalVolume = 0;
-    let successfulVolume = 0;
-    transactions.forEach((tx) => {
-      totalVolume += tx.amount;
-      if (tx.status === 'SUCCESS') {
-        successfulVolume += tx.amount;
-      }
+    const successfulAgg = await this.prisma.transaction.aggregate({
+      where: {
+        OR: [{ status: 'SUCCESS' }, { status: 'COMPLETED' }],
+      },
+      _sum: { amount: true },
     });
+    const revenue = successfulAgg._sum.amount || 0;
+
+    const totalVolumeAgg = await this.prisma.transaction.aggregate({
+      _sum: { amount: true },
+    });
+    const totalVolume = totalVolumeAgg._sum.amount || 0;
+
+    const recentTransactions = await this.prisma.transaction.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        merchant: {
+          include: {
+            tenant: { select: { name: true, slug: true } },
+          },
+        },
+      },
+    });
+
+    // Status breakdown chart data
+    const statusCounts = await this.prisma.transaction.groupBy({
+      by: ['status'],
+      _count: { _all: true },
+      _sum: { amount: true },
+    });
+
+    const statusBreakdown = statusCounts.map((item) => ({
+      status: item.status,
+      count: item._count._all,
+      volume: item._sum.amount || 0,
+    }));
 
     return {
       message: 'Global system overview retrieved successfully',
       summary: {
         totalTenants,
         activeTenants,
+        totalMerchants,
         totalUsers,
         totalTransactions,
+        revenue,
         totalVolume,
-        successfulVolume,
+        failedTransactions,
         systemHealth: '100% Operational',
+        recentTransactions,
+        chartData: statusBreakdown,
       },
     };
   }
 
   // নির্দিষ্ট টিনেন্টের ড্যাশবোর্ড সামারি তৈরি করা
   async getTransactionSummary(tenantId: string) {
-    // ১. মোট মার্চেন্ট ও এপিআই কি সংখ্যা
     const totalMerchants = await this.prisma.merchant.count({
+      where: { tenantId },
+    });
+
+    const totalUsers = await this.prisma.user.count({
       where: { tenantId },
     });
 
@@ -188,53 +90,66 @@ export class ReportsService {
       where: { tenantId },
     });
 
-    // ২. এই টিনেন্টের অধীনে থাকা সব ট্রানজেকশন ফেচ করা
-    const transactions = await this.prisma.transaction.findMany({
+    const totalTransactions = await this.prisma.transaction.count({
+      where: { merchant: { tenantId } },
+    });
+
+    const failedTransactions = await this.prisma.transaction.count({
       where: {
-        merchant: {
-          tenantId: tenantId,
-        },
-      },
-      select: {
-        amount: true,
-        status: true,
+        merchant: { tenantId },
+        OR: [{ status: 'FAILED' }, { status: 'REJECTED' }],
       },
     });
 
-    const totalTransactions = transactions.length;
-    let totalVolume = 0;
-    let successfulVolume = 0;
-    let successfulCount = 0;
-    let pendingCount = 0;
-    let failedCount = 0;
-
-    // ট্রানজেকশনগুলোর ওপর লুপ চালিয়ে সামারি ক্যালকুলেট করা
-    transactions.forEach((tx) => {
-      totalVolume += tx.amount;
-
-      if (tx.status === 'SUCCESS') {
-        successfulVolume += tx.amount;
-        successfulCount++;
-      } else if (tx.status === 'PENDING') {
-        pendingCount++;
-      } else if (tx.status === 'FAILED') {
-        failedCount++;
-      }
+    const revenueAgg = await this.prisma.transaction.aggregate({
+      where: {
+        merchant: { tenantId },
+        OR: [{ status: 'SUCCESS' }, { status: 'COMPLETED' }],
+      },
+      _sum: { amount: true },
     });
+    const revenue = revenueAgg._sum.amount || 0;
+
+    const totalVolumeAgg = await this.prisma.transaction.aggregate({
+      where: { merchant: { tenantId } },
+      _sum: { amount: true },
+    });
+    const totalVolume = totalVolumeAgg._sum.amount || 0;
+
+    const recentTransactions = await this.prisma.transaction.findMany({
+      where: { merchant: { tenantId } },
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        merchant: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    const statusCounts = await this.prisma.transaction.groupBy({
+      by: ['status'],
+      where: { merchant: { tenantId } },
+      _count: { _all: true },
+      _sum: { amount: true },
+    });
+
+    const statusBreakdown = statusCounts.map((item) => ({
+      status: item.status,
+      count: item._count._all,
+      volume: item._sum.amount || 0,
+    }));
 
     return {
       message: 'Dashboard summary retrieved successfully',
       summary: {
         totalMerchants,
+        totalUsers,
         totalTransactions,
+        revenue,
         totalVolume,
-        successfulVolume,
+        failedTransactions,
         activeApiKeys,
-        statusBreakdown: {
-          success: successfulCount,
-          pending: pendingCount,
-          failed: failedCount,
-        },
+        recentTransactions,
+        chartData: statusBreakdown,
       },
     };
   }
