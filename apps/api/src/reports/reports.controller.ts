@@ -78,17 +78,17 @@
 
 // ---------------
 
-import { Controller, Get, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Get, UseGuards, Query, Req, Res } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import type { Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'; // সোয়াগার ডেকোরেটর ইমপোর্ট
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
-@ApiTags('Reports') // সোয়াগার ইউআইতে ক্যাটাগরি নাম
-@ApiBearerAuth()    // টোকেন ইনপুট দেওয়ার অপশন এনাবল করবে
+@ApiTags('Reports')
+@ApiBearerAuth()
 @Controller('reports')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class ReportsController {
@@ -103,18 +103,31 @@ export class ReportsController {
 
   @Get('summary')
   @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR, Role.VIEWER)
-  @ApiOperation({ summary: 'Get transaction summary and dashboard stats for tenant' })
-  async getSummary(@Req() req: any) {
-    const tenantId = req.user.tenantId;
-    return this.reportsService.getTransactionSummary(tenantId);
+  @ApiOperation({ summary: 'Get transaction summary and dashboard stats for tenant or super admin' })
+  async getSummary(
+    @Query('period') period?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Req() req?: any,
+  ) {
+    const isSuperAdmin = req.user?.role === Role.SUPER_ADMIN;
+    const tenantId = isSuperAdmin ? undefined : req.user?.tenantId;
+    return this.reportsService.getTransactionSummary(tenantId, period, startDate, endDate, isSuperAdmin);
   }
 
   @Get('transactions/csv')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR, Role.VIEWER)
   @ApiOperation({ summary: 'Download transactions report as CSV' })
-  async downloadTransactionsCsv(@Req() req: any, @Res() res: Response) {
-    const tenantId = req.user.tenantId;
-    const csv = await this.reportsService.exportTransactionsCsv(tenantId);
+  async downloadTransactionsCsv(
+    @Query('period') period: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    const isSuperAdmin = req.user?.role === Role.SUPER_ADMIN;
+    const tenantId = isSuperAdmin ? undefined : req.user?.tenantId;
+    const csv = await this.reportsService.exportTransactionsCsv(tenantId, period, startDate, endDate, isSuperAdmin);
 
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=transactions-report.csv');

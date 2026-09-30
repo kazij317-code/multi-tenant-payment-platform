@@ -76,34 +76,76 @@ export class ReportsService {
     };
   }
 
-  // নির্দিষ্ট টিনেন্টের ড্যাশবোর্ড সামারি তৈরি করা
-  async getTransactionSummary(tenantId: string) {
+  // Build date filter clause helper
+  private buildDateWhereClause(startDate?: string, endDate?: string, period?: string) {
+    const where: any = {};
+    const now = new Date();
+
+    if (period === 'daily') {
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      where.createdAt = { gte: startOfDay };
+    } else if (period === 'monthly') {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      where.createdAt = { gte: startOfMonth };
+    } else if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate);
+      }
+      if (endDate) {
+        // set to end of that day if plain date string (e.g. 2026-09-30T23:59:59)
+        const end = new Date(endDate);
+        if (endDate.length <= 10) {
+          end.setHours(23, 59, 59, 999);
+        }
+        where.createdAt.lte = end;
+      }
+    }
+    return where;
+  }
+
+  // নির্দিষ্ট টিনেন্টের ড্যাশবোর্ড ও রিপোর্টিং সামারি তৈরি করা (Super Admin-এর জন্য গ্লোবাল)
+  async getTransactionSummary(
+    tenantId?: string,
+    period?: string,
+    startDate?: string,
+    endDate?: string,
+    isSuperAdmin: boolean = false,
+  ) {
+    const dateWhere = this.buildDateWhereClause(startDate, endDate, period);
+    const tenantWhere = isSuperAdmin || !tenantId ? {} : { tenantId };
+
     const totalMerchants = await this.prisma.merchant.count({
-      where: { tenantId },
+      where: tenantWhere,
     });
 
     const totalUsers = await this.prisma.user.count({
-      where: { tenantId },
+      where: tenantWhere,
     });
 
     const activeApiKeys = await this.prisma.apiKey.count({
-      where: { tenantId },
+      where: tenantWhere,
     });
 
+    const txWhereClause = {
+      ...(isSuperAdmin || !tenantId ? {} : { merchant: { tenantId } }),
+      ...dateWhere,
+    };
+
     const totalTransactions = await this.prisma.transaction.count({
-      where: { merchant: { tenantId } },
+      where: txWhereClause,
     });
 
     const failedTransactions = await this.prisma.transaction.count({
       where: {
-        merchant: { tenantId },
+        ...txWhereClause,
         OR: [{ status: 'FAILED' }, { status: 'REJECTED' }],
       },
     });
 
     const revenueAgg = await this.prisma.transaction.aggregate({
       where: {
-        merchant: { tenantId },
+        ...txWhereClause,
         OR: [{ status: 'SUCCESS' }, { status: 'COMPLETED' }],
       },
       _sum: { amount: true },
@@ -111,14 +153,14 @@ export class ReportsService {
     const revenue = revenueAgg._sum.amount || 0;
 
     const totalVolumeAgg = await this.prisma.transaction.aggregate({
-      where: { merchant: { tenantId } },
+      where: txWhereClause,
       _sum: { amount: true },
     });
     const totalVolume = totalVolumeAgg._sum.amount || 0;
 
     const recentTransactions = await this.prisma.transaction.findMany({
-      where: { merchant: { tenantId } },
-      take: 5,
+      where: txWhereClause,
+      take: 10,
       orderBy: { createdAt: 'desc' },
       include: {
         merchant: { select: { id: true, name: true, email: true } },
@@ -127,7 +169,7 @@ export class ReportsService {
 
     const statusCounts = await this.prisma.transaction.groupBy({
       by: ['status'],
-      where: { merchant: { tenantId } },
+      where: txWhereClause,
       _count: { _all: true },
       _sum: { amount: true },
     });
@@ -150,19 +192,33 @@ export class ReportsService {
         activeApiKeys,
         recentTransactions,
         chartData: statusBreakdown,
+        period: period || 'all',
+        startDate,
+        endDate,
       },
     };
   }
 
   // ৩. ট্রানজেকশন ডেটা সিএসভি ফরম্যাটে এক্সপোর্ট করার মেথড
-  async exportTransactionsCsv(tenantId: string): Promise<string> {
+  async exportTransactionsCsv(
+    tenantId?: string,
+    period?: string,
+    startDate?: string,
+    endDate?: string,
+    isSuperAdmin: boolean = false,
+  ): Promise<string> {
+    const dateWhere = this.buildDateWhereClause(startDate, endDate, period);
+    const txWhereClause = {
+      ...(isSuperAdmin || !tenantId ? {} : { merchant: { tenantId } }),
+      ...dateWhere,
+    };
+
     const transactions = await this.prisma.transaction.findMany({
-      where: {
-        merchant: { tenantId },
-      },
+      where: txWhereClause,
       include: {
         merchant: true,
       },
+      orderBy: { createdAt: 'desc' },
     });
 
     const data = transactions.map((tx) => ({
@@ -171,11 +227,12 @@ export class ReportsService {
       Amount: tx.amount,
       Currency: tx.currency,
       Status: tx.status,
+      PaymentMethod: tx.paymentMethod || 'N/A',
       MerchantName: tx.merchant?.name || 'N/A',
       CreatedAt: tx.createdAt.toISOString(),
     }));
 
-    const fields = ['ID', 'Reference', 'Amount', 'Currency', 'Status', 'MerchantName', 'CreatedAt'];
+    const fields = ['ID', 'Reference', 'Amount', 'Currency', 'Status', 'PaymentMethod', 'MerchantName', 'CreatedAt'];
     const json2csvParser = new Parser({ fields });
     const csv = json2csvParser.parse(data);
 
