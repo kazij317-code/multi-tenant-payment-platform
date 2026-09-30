@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from '../mail/mail.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -23,6 +25,18 @@ describe('AuthService', () => {
             signAsync: jest.fn().mockResolvedValue('token'),
           },
         },
+        {
+          provide: MailService,
+          useValue: {
+            sendPasswordResetEmail: jest.fn().mockResolvedValue(true),
+          },
+        },
+        {
+          provide: AuditLogsService,
+          useValue: {
+            logAction: jest.fn().mockResolvedValue(true),
+          },
+        },
       ],
     }).compile();
 
@@ -33,4 +47,3 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 });
-

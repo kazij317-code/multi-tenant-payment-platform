@@ -47,6 +47,17 @@ npm run start:dev
 - **Swagger Documentation**: [http://localhost:5000/api-docs](http://localhost:5000/api-docs)
 - **Frontend App**: [http://localhost:3000](http://localhost:3000)
 - **Mailpit Dashboard**: [http://localhost:8025](http://localhost:8025)
+- **Prometheus Dashboard**: [http://localhost:9090](http://localhost:9090)
+
+---
+
+## 🎁 Bonus & Production Features Implemented
+
+1. **Redis Caching**: Configured containerized Redis caching for optimized database query speed.
+2. **CI/CD Pipeline**: GitHub Actions workflow ([`.github/workflows/ci.yml`](file:///e:/Projects/multi-tenant-payment-platform/.github/workflows/ci.yml)) for automated linting, unit & E2E testing, and Docker builds.
+3. **Kubernetes Deployment**: Fully configured K8s manifests in [`k8s/`](file:///e:/Projects/multi-tenant-payment-platform/k8s/) featuring Deployments, ClusterIP Services, ConfigMap/Secret management, HorizontalPodAutoscaler (HPA), and NGINX Ingress rules.
+4. **Prometheus Monitoring**: Metrics collection & scrape configuration ([`monitoring/prometheus.yml`](file:///e:/Projects/multi-tenant-payment-platform/monitoring/prometheus.yml)).
+5. **Integration & E2E Testing**: Comprehensive test coverage for Auth, User Management, and Transaction Flow in [`apps/api/test/`](file:///e:/Projects/multi-tenant-payment-platform/apps/api/test/).
 
 ---
 
@@ -64,10 +75,17 @@ npm run start:dev
 
 ```bash
 cd apps/api
+
+# Run Unit Tests
 npm test
+
+# Run Integration / E2E Tests
+npm run test:e2e
 ```
 
 ---
 
 ## 📚 Documentation
 - System Architecture & ERD Diagram: [`docs/ARCHITECTURE.md`](file:///e:/Projects/multi-tenant-payment-platform/docs/ARCHITECTURE.md)
+- Complete Project Documentation: [`PROJECT_DOCUMENTATION.md`](file:///e:/Projects/multi-tenant-payment-platform/PROJECT_DOCUMENTATION.md)
+
