@@ -8,22 +8,23 @@ datasource db {
 }
 
 model Tenant {
-  id        String   @id @default(uuid())
+  id        String         @id @default(uuid())
   name      String
-  slug      String   @unique
-  status    String   @default("ACTIVE") // ACTIVE, SUSPENDED
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  apiKeys   ApiKey[] // এই লাইনটি যোগ করতে হবে
-notifications Notification[] // এই লাইনটি যোগ করতে হবে
+  slug      String         @unique
+  status    String         @default("ACTIVE") // ACTIVE, SUSPENDED
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  apiKeys   ApiKey[]
+  notifications Notification[]
   users     User[]
-  merchants Merchant[] // এটি যুক্ত করো
+  merchants Merchant[]
   auditLogs AuditLog[]
   
+  @@index([slug])
+  @@index([status])
   @@map("tenants")
 }
 
-// উদাহরণস্বরূপ User মডেলটি এমন হবে:
 enum Role {
   SUPER_ADMIN
   TENANT_ADMIN
@@ -32,45 +33,47 @@ enum Role {
   VIEWER
 }
 
-
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  refreshTokenHash String?  // নতুন যুক্ত হলো
-  firstName    String?
-  lastName     String?
-  isActive     Boolean  @default(true)
+  id               String   @id @default(uuid())
+  email            String   @unique
+  passwordHash     String
+  refreshTokenHash String?
+  firstName        String?
+  lastName         String?
+  isActive         Boolean  @default(true)
+  role             Role     @default(VIEWER)
 
-  role      Role     @default(VIEWER) // ডিফল্ট রোল ভিউয়ার হিসেবে থাকবে
-  
-  // Multi-tenant relation: প্রতিটি ইউজার কোনো না কোনো টিনেন্টের সাথে যুক্ত থাকবে
-  tenantId     String
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // Multi-tenant relation
+  tenantId         String
+  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  
-
+  @@index([tenantId])
+  @@index([email])
+  @@index([role])
   @@map("users")
 }
 
 model Merchant {
-  id          String   @id @default(uuid())
-  name        String
-  email       String
-  status      String   @default("ACTIVE") // ACTIVE বা SUSPENDED
+  id           String        @id @default(uuid())
+  name         String
+  email        String
+  status       String        @default("ACTIVE") // ACTIVE, SUSPENDED
   
-  // টিনেন্টের সাথে রিলেশন
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // Tenant relation
+  tenantId     String
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  transactions Transaction[] // এটি যুক্ত করো
+  transactions Transaction[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
+  @@index([tenantId])
+  @@index([status])
+  @@index([email])
   @@map("merchants")
 }
 
@@ -79,50 +82,69 @@ model Transaction {
   amount        Float
   currency      String   @default("BDT")
   status        String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED, REFUNDED
-  reference     String   @unique // ইউনিক ট্রানজেকশন রেফারেন্স বা আইডি
+  reference     String   @unique
   paymentMethod String   @default("bKash") // bKash, Nagad, Card, Bank Transfer
   createdById   String?
   
-  // কার অধীনে ট্রানজেকশনটি হচ্ছে (Merchant-এর সাথে রিলেশন)
+  // Merchant relation
   merchantId    String
   merchant      Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  @@index([merchantId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([reference])
   @@map("transactions")
 }
 
 model AuditLog {
   id        String   @id @default(uuid())
-  action    String   // যেমন: 'USER_CREATED', 'PAYMENT_PROCESSED' ইত্যাদি
-  userId    String   // কাজটি যে ইউজার করেছে তার আইডি
-  tenantId  String   // কোন টিনেন্টের অধীনে ঘটনাটি ঘটেছে
-  details   String?  // অতিরিক্ত তথ্য (JSON বা স্ট্রিং আকারে)
+  action    String
+  userId    String
+  tenantId  String
+  details   String?
   createdAt DateTime @default(now())
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("audit_logs")
 }
 
 model Notification {
   id        String   @id @default(uuid())
   title     String
   message   String
-  type      String   // যেমন: TRANSACTION, MERCHANT, USER ইত্যাদি
+  type      String
   isRead    Boolean  @default(false)
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
 }
 
 model ApiKey {
   id        String   @id @default(uuid())
-  name      String   // কী-এর নাম (যেমন: Production Key)
-  key       String   @unique // ইউনিক সিক্রেট কি
+  name      String
+  key       String   @unique
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([key])
+  @@map("api_keys")
 }
 
 model SystemConfig {
