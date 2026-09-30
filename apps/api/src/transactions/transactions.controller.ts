@@ -164,7 +164,7 @@ export class TransactionsController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR)
   async create(
     @Body() body: { amount: number; currency?: string; reference: string; merchantId: string; paymentMethod?: string; status?: any },
     @Req() req: any,
@@ -176,7 +176,7 @@ export class TransactionsController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get()
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.VIEWER)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR, Role.VIEWER)
   async findAll(
     @Query('status') status?: any,
     @Query('merchantId') merchantId?: string,
@@ -191,7 +191,7 @@ export class TransactionsController {
   // ট্রানজেকশন অ্যাপ্রুভ রাউট
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Patch(':id/approve')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async approve(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
     const userId = req.user.userId || req.user.sub || req.user.id;
@@ -201,7 +201,7 @@ export class TransactionsController {
   // ট্রানজেকশন রিজেক্ট রাউট
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Patch(':id/reject')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async reject(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
     const userId = req.user.userId || req.user.sub || req.user.id;
@@ -211,7 +211,7 @@ export class TransactionsController {
   // ট্রানজেকশন রিফান্ড রাউট
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Patch(':id/refund')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async refund(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
     const userId = req.user.userId || req.user.sub || req.user.id;

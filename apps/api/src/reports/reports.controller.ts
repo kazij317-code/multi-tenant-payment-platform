@@ -110,7 +110,7 @@ export class ReportsController {
   }
 
   @Get('transactions/csv')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Download transactions report as CSV' })
   async downloadTransactionsCsv(@Req() req: any, @Res() res: Response) {
     const tenantId = req.user.tenantId;

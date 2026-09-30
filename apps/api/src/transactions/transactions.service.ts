@@ -570,6 +570,25 @@ export class TransactionsService {
       },
     });
 
+    // ইন-অ্যাপ নোটিফিকেশন: Transaction Created
+    await this.notificationsService.createNotification({
+      title: 'Transaction Created',
+      message: `Transaction ${transaction.reference} created for ${transaction.amount} ${transaction.currency}.`,
+      type: 'TRANSACTION',
+      tenantId: tenantId,
+    });
+
+    if (transaction.status === 'FAILED') {
+      await this.notificationsService.createNotification({
+        title: 'Transaction Failed',
+        message: `Transaction ${transaction.reference} has failed.`,
+        type: 'TRANSACTION',
+        tenantId: tenantId,
+      });
+      const userEmail = merchant.email || 'admin@example.com';
+      await this.mailService.sendTransactionEmail(userEmail, transaction.reference, 'FAILED');
+    }
+
     return {
       message: 'Transaction processed successfully',
       transaction,
@@ -661,6 +680,7 @@ export class TransactionsService {
         id: transactionId,
         merchant: { tenantId },
       },
+      include: { merchant: true },
     });
 
     if (!transaction) {
@@ -671,6 +691,18 @@ export class TransactionsService {
       where: { id: transactionId },
       data: { status: 'FAILED' },
     });
+
+    // ইন-অ্যাপ নোটিফিকেশন: Transaction Failed
+    await this.notificationsService.createNotification({
+      title: 'Transaction Failed',
+      message: `Transaction ${transaction.reference} has been rejected / failed.`,
+      type: 'TRANSACTION',
+      tenantId: tenantId,
+    });
+
+    // ইমেল নোটিফিকেশন: Status Updated
+    const userEmail = transaction.merchant?.email || 'admin@example.com';
+    await this.mailService.sendTransactionEmail(userEmail, transaction.reference, 'FAILED');
 
     // অডিট লগ রেকর্ড করা
     if (userId) {
@@ -695,6 +727,7 @@ export class TransactionsService {
         id: transactionId,
         merchant: { tenantId },
       },
+      include: { merchant: true },
     });
 
     if (!transaction) {
@@ -709,6 +742,18 @@ export class TransactionsService {
       where: { id: transactionId },
       data: { status: 'REFUNDED' },
     });
+
+    // ইন-অ্যাপ নোটিফিকেশন
+    await this.notificationsService.createNotification({
+      title: 'Transaction Refunded',
+      message: `Transaction ${transaction.reference} has been refunded.`,
+      type: 'TRANSACTION',
+      tenantId: tenantId,
+    });
+
+    // ইমেল নোটিফিকেশন
+    const userEmail = transaction.merchant?.email || 'admin@example.com';
+    await this.mailService.sendTransactionEmail(userEmail, transaction.reference, 'REFUNDED');
 
     // অডিট লগ রেকর্ড করা
     if (userId) {

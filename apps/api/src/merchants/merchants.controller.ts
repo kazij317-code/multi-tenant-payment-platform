@@ -57,7 +57,7 @@ export class MerchantsController {
   }
 
   @Post()
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async create(@Body() body: { name: string; email: string }, @Req() req: any) {
     const tenantId = req.user.tenantId;
     const userId = req.user.userId || req.user.sub || req.user.id;
@@ -65,14 +65,14 @@ export class MerchantsController {
   }
 
   @Get()
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.VIEWER)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR, Role.VIEWER)
   async findAll(@Req() req: any) {
     const tenantId = req.user.tenantId;
     return this.merchantsService.getMerchantsByTenant(tenantId);
   }
 
   @Get(':id')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.VIEWER)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR, Role.VIEWER)
   async getProfile(@Param('id') id: string, @Req() req: any) {
     const isSuper = req.user.role === Role.SUPER_ADMIN;
     const tenantId = isSuper ? undefined : req.user.tenantId;
@@ -80,7 +80,7 @@ export class MerchantsController {
   }
 
   @Patch(':id')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async update(
     @Param('id') id: string,
     @Body() body: { name?: string; email?: string; status?: string },
@@ -92,7 +92,7 @@ export class MerchantsController {
   }
 
   @Patch(':id/status')
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async updateStatus(
     @Param('id') id: string,
     @Body() body: { status: string },

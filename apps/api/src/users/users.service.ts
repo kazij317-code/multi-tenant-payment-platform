@@ -514,12 +514,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
     private auditLogsService: AuditLogsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   // নির্দিষ্ট টিনেন্টের অধীনে নতুন ইউজার তৈরি
@@ -553,6 +555,14 @@ export class UsersService {
       userId: currentUserId || user.id,
       tenantId: tenantId,
       details: `User created with email: ${user.email} and role: ${user.role}`,
+    });
+
+    // ইন-অ্যাপ নোটিফিকেশন তৈরি
+    await this.notificationsService.createNotification({
+      title: 'User Created',
+      message: `New user ${user.email} with role ${user.role} has been created.`,
+      type: 'USER',
+      tenantId: tenantId,
     });
 
     const { passwordHash, ...result } = user;

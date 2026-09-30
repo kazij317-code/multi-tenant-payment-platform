@@ -132,7 +132,7 @@ export class UsersController {
 
   // সার্চ ও পেজিনেশন সহ সব ইউজারের লিস্ট দেখা
   @Get()
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR, Role.VIEWER)
   async getAllUsers(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
