@@ -139,22 +139,7 @@ async function main() {
     });
   }
 
-  // Additional users to total 17 registered members
-  for (let i = 1; i <= 12; i++) {
-    const pwdHash = await bcrypt.hash('user123', 10);
-    await prisma.user.upsert({
-      where: { email: `user${i}@beta.com` },
-      update: {},
-      create: {
-        email: `user${i}@beta.com`,
-        passwordHash: pwdHash,
-        role: 'OPERATOR',
-        tenantId: betaTenant.id,
-        firstName: `Staff_${i}`,
-        lastName: 'Beta',
-      },
-    });
-  }
+
 
   // 4. Create 28 Demo Transactions to reach $18,840.00 Revenue ($18,584 SUCCESS + $256 COMPLETED)
   const transactionsData = [
