@@ -179,9 +179,9 @@ The system features robust role-based access control (RBAC) spanning 5 hierarchi
 
 | Role | Email | Password | Tenant |
 |---|---|---|---|
-| **Super Admin** | `superadmin@platform.com` | `admin123` | N/A (`system`) |
-| **Tenant Admin** | `admin@beta.com` | `admin123` | `beta-corp` |
-| **Manager** | `manager@beta.com` | `newpassword123` | `beta-corp` |
+| **Super Admin** | `admin@platform.com` | `SuperAdmin@123` | System (`system`) |
+| **Manager** | `manager@beta.com` | `newpassword123` | Beta Corp (`beta-corp`) |
+| **Manager** | `manager@acme.com` | `Nabhan@123` | Acme Corp (`acme-corp`) |
 
 ---
 
