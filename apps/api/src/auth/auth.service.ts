@@ -251,20 +251,15 @@ export class AuthService {
   // পাসওয়ার্ড ভুলে যাওয়ার রিকোয়েস্ট (মকড)
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      throw new BadRequestException('User with this email not found');
-    }
-
-    // একটি সাময়িক রিসেট টোকেন জেনারেট করা যেতে পারে
+    
+    // রিসেট টোকেন জেনারেট করা
     const resetToken = this.jwtService.sign(
-      { sub: user.id, email: user.email },
+      { sub: user?.id || 'demo-user-id', email: email },
       { secret: process.env.JWT_SECRET || 'SUPER_SECRET_KEY_HERE', expiresIn: '15m' },
     );
 
-    // MailService ব্যবহার করে ব্যাকগ্রাউন্ডে ইমেল পাঠানো (non-blocking)
-    this.mailService.sendPasswordResetEmail(email, resetToken).catch((err) => {
-      console.error('Email send failed in background:', err);
-    });
+    // MailService ব্যবহার করে সরাসরি ইমেইল পাঠানো
+    await this.mailService.sendPasswordResetEmail(email, resetToken);
 
     return { message: 'Password reset instructions sent to your email successfully.' };
   }
