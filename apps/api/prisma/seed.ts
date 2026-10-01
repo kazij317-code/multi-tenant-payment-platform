@@ -124,24 +124,7 @@ async function main() {
     },
   });
 
-  // Additional demo merchants to total 18 active profiles
-  for (let i = 3; i <= 15; i++) {
-    await prisma.merchant.upsert({
-      where: { id: `m-beta-${i}` },
-      update: {},
-      create: {
-        id: `m-beta-${i}`,
-        name: `Beta Merchant Branch #${i}`,
-        email: `branch${i}@beta.com`,
-        tenantId: betaTenant.id,
-        status: 'ACTIVE',
-      },
-    });
-  }
-
-
-
-  // 4. Create 28 Demo Transactions to reach $18,840.00 Revenue ($18,584 SUCCESS + $256 COMPLETED)
+  // 4. Create 14 Clean Demo Transactions
   const transactionsData = [
     { id: 'tx-1', reference: 'TXN-1001', amount: 5000, status: 'SUCCESS', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
     { id: 'tx-2', reference: 'TXN-1002', amount: 4292, status: 'SUCCESS', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
@@ -157,21 +140,6 @@ async function main() {
     { id: 'tx-12', reference: 'TXN-1012', amount: 500, status: 'PROCESSING', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
     { id: 'tx-13', reference: 'TXN-1013', amount: 300, status: 'PROCESSING', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
     { id: 'tx-14', reference: 'TXN-1014', amount: 250, status: 'PROCESSING', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
-    // Batch 2 to match Localhost 28 transactions ($18,840)
-    { id: 'tx-15', reference: 'TXN-2001', amount: 5000, status: 'SUCCESS', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
-    { id: 'tx-16', reference: 'TXN-2002', amount: 4292, status: 'SUCCESS', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
-    { id: 'tx-17', reference: 'TXN-2003', amount: 128, status: 'COMPLETED', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
-    { id: 'tx-18', reference: 'TXN-2004', amount: 1200, status: 'PENDING', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
-    { id: 'tx-19', reference: 'TXN-2005', amount: 1500, status: 'REFUNDED', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
-    { id: 'tx-20', reference: 'TXN-2006', amount: 1100, status: 'REFUNDED', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
-    { id: 'tx-21', reference: 'TXN-2007', amount: 1000, status: 'REFUNDED', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
-    { id: 'tx-22', reference: 'TXN-2008', amount: 350, status: 'SUCCESS', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
-    { id: 'tx-23', reference: 'TXN-2009', amount: 450, status: 'SUCCESS', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
-    { id: 'tx-24', reference: 'TXN-2010', amount: 200, status: 'SUCCESS', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
-    { id: 'tx-25', reference: 'TXN-2011', amount: 150, status: 'SUCCESS', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
-    { id: 'tx-26', reference: 'TXN-2012', amount: 500, status: 'SUCCESS', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
-    { id: 'tx-27', reference: 'TXN-2013', amount: 300, status: 'SUCCESS', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
-    { id: 'tx-28', reference: 'TXN-2014', amount: 2042, status: 'SUCCESS', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
   ];
 
   for (const tx of transactionsData) {
