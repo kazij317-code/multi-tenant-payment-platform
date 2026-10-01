@@ -261,8 +261,10 @@ export class AuthService {
       { secret: process.env.JWT_SECRET || 'SUPER_SECRET_KEY_HERE', expiresIn: '15m' },
     );
 
-    // MailService ব্যবহার করে রিয়েল ইমেল পাঠানো
-    await this.mailService.sendPasswordResetEmail(email, resetToken);
+    // MailService ব্যবহার করে ব্যাকগ্রাউন্ডে ইমেল পাঠানো (non-blocking)
+    this.mailService.sendPasswordResetEmail(email, resetToken).catch((err) => {
+      console.error('Email send failed in background:', err);
+    });
 
     return { message: 'Password reset instructions sent to your email successfully.' };
   }
