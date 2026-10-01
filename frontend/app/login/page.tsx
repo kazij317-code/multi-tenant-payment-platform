@@ -378,9 +378,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setEmail('superadmin@platform.com');
+                  setEmail('admin@platform.com');
                   setTenantSlug('system');
-                  setPassword('admin123');
+                  setPassword('SuperAdmin@123');
                 }}
                 className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-[11px] font-medium transition-colors shadow-xs"
               >
@@ -390,14 +390,14 @@ export default function LoginPage() {
 
             <div className="flex justify-between items-center border-b border-indigo-100 pb-2">
               <span className="font-semibold text-indigo-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <span>🛡️</span> Tenant Admin Demo
+                <span>🛡️</span> Tenant Admin Demo (Acme)
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  setEmail('admin@beta.com');
-                  setTenantSlug('beta-corp');
-                  setPassword('admin123');
+                  setEmail('manager@acme.com');
+                  setTenantSlug('acme-corp');
+                  setPassword('Nabhan@123');
                 }}
                 className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-[11px] font-medium transition-colors shadow-xs"
               >
@@ -407,7 +407,7 @@ export default function LoginPage() {
 
             <div className="flex justify-between items-center">
               <span className="font-semibold text-indigo-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <span>👤</span> Manager Demo
+                <span>👤</span> Manager Demo (Beta)
               </span>
               <button
                 type="button"
