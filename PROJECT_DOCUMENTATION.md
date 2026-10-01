@@ -175,4 +175,14 @@ The system features robust role-based access control (RBAC) spanning 5 hierarchi
 
 ---
 
+## 🔑 Test Credentials (Mock Data)
+
+| Role | Email | Password | Tenant |
+|---|---|---|---|
+| **Super Admin** | `superadmin@platform.com` | `admin123` | N/A (`system`) |
+| **Tenant Admin** | `admin@beta.com` | `admin123` | `beta-corp` |
+| **Manager** | `manager@beta.com` | `newpassword123` | `beta-corp` |
+
+---
+
 *Documentation generated for Multi-Tenant Payment Platform.*

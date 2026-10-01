@@ -335,7 +335,16 @@ export default function LoginPage() {
 
     } catch (err: any) {
       console.error('Login failed', err);
-      setError(err.response?.data?.message || 'Invalid email, password, or tenant slug');
+      const serverMsg = err.response?.data?.message;
+      if (Array.isArray(serverMsg)) {
+        setError(serverMsg.join(', '));
+      } else if (typeof serverMsg === 'string') {
+        setError(serverMsg);
+      } else if (err.message && err.message.includes('Network Error')) {
+        setError('Network Error: Cannot connect to backend server at http://localhost:5000');
+      } else {
+        setError('Invalid email, password, or tenant slug');
+      }
     }
   };
 
@@ -369,9 +378,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setEmail('admin@platform.com');
+                  setEmail('superadmin@platform.com');
                   setTenantSlug('system');
-                  setPassword('SuperAdmin@123');
+                  setPassword('admin123');
                 }}
                 className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-[11px] font-medium transition-colors shadow-xs"
               >
@@ -379,9 +388,26 @@ export default function LoginPage() {
               </button>
             </div>
 
+            <div className="flex justify-between items-center border-b border-indigo-100 pb-2">
+              <span className="font-semibold text-indigo-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <span>🛡️</span> Tenant Admin Demo
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@beta.com');
+                  setTenantSlug('beta-corp');
+                  setPassword('admin123');
+                }}
+                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-[11px] font-medium transition-colors shadow-xs"
+              >
+                Auto Fill Tenant Admin
+              </button>
+            </div>
+
             <div className="flex justify-between items-center">
               <span className="font-semibold text-indigo-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <span>👤</span> Tenant Manager Demo
+                <span>👤</span> Manager Demo
               </span>
               <button
                 type="button"
@@ -392,7 +418,7 @@ export default function LoginPage() {
                 }}
                 className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[11px] font-medium transition-colors shadow-xs"
               >
-                Auto Fill Tenant
+                Auto Fill Manager
               </button>
             </div>
           </div>

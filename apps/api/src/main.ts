@@ -1,23 +1,3 @@
-// import { NestFactory } from '@nestjs/core';
-// import { AppModule } from './app.module';
-// import { ValidationPipe } from '@nestjs/common'; // এটি ইমপোর্ট করো
-
-// async function bootstrap() {
-//   const app = await NestFactory.create(AppModule);
-
-//   // গ্লোবাল ভ্যালিডেশন পাইপ যুক্ত করা
-//   app.useGlobalPipes(new ValidationPipe({
-//     whitelist: true, // DTO-তে ডিফাইন করা নাই এমন কোনো অতিরিক্ত ফিল্ড রিকোয়েস্টে আসলে তা রিমুভ করে দিবে
-//     forbidNonWhitelisted: true, // অতিরিক্ত ফিল্ড আসলে এরর দিবে
-//     transform: true, // স্বয়ংক্রিয়ভাবে ডেটা টাইপ রূপান্তর করবে (যেমন স্ট্রিং থেকে নাম্বারে)
-//   }));
-
-//   await app.listen(3000);
-// }
-// bootstrap();
-
-// -----------------
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -30,12 +10,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // সিকিউর হেডার্স (Secure Headers, XSS Protection & CSP)
-  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false }));
 
   // CORS এনাবল করা
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: true,
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   // গ্লোবাল ভ্যালিডেশন পাইপ
@@ -60,6 +42,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
 
-  await app.listen(5000);
+  const port = process.env.PORT || 5000;
+  await app.listen(port);
+  console.log(`Server is running on port ${port}`);
 }
 bootstrap();

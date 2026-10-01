@@ -1,24 +1,33 @@
-# Node.js ইমেজ ব্যবহার করা
-FROM node:18-alpine
+# 1. Build Stage
+FROM node:20-alpine AS builder
 
-# ওয়ার্কিং ডিরেক্টরি সেট করা
+# Alpine Linux-এর জন্য OpenSSL ইনস্টল করা যাতে প্রিজমা কাজ করতে পারে
+RUN apk add --no-cache openssl
+
 WORKDIR /usr/src/app
-
-# প্যাকেজ ফাইল কপি করা এবং ডিপেন্ডেন্সি ইন্সটল করা
 COPY package*.json ./
+COPY apps/api/package*.json ./apps/api/
+WORKDIR /usr/src/app/apps/api
 RUN npm install
-
-# প্রজেক্টের বাকি ফাইলগুলো কপি করা
-COPY . .
-
-# প্রিজমা স্কিমা জেনারেট করা
+COPY apps/api ./
 RUN npx prisma generate
-
-# প্রোডাকশনের জন্য অ্যাপ বিল্ড করা
 RUN npm run build
 
-# পোর্ট ওপেন করা
-EXPOSE 3000
+# 2. Production Stage
+FROM node:20-alpine AS runner
 
-# অ্যাপ স্টার্ট করার কমান্ড
+# প্রোডাকশন স্টেপেও ওপেনএসএল যুক্ত করা
+RUN apk add --no-cache openssl
+
+WORKDIR /usr/src/app/apps/api
+ENV NODE_ENV=production
+
+COPY package*.json ./
+COPY apps/api/package*.json ./
+# প্রোডাকশনে আলাদা করে npm install না চালিয়ে builder থেকে node_modules, dist এবং prisma কপি করা হচ্ছে
+COPY --from=builder /usr/src/app/apps/api/node_modules ./node_modules
+COPY --from=builder /usr/src/app/apps/api/dist ./dist
+COPY --from=builder /usr/src/app/apps/api/prisma ./prisma
+
+EXPOSE 5000
 CMD ["npm", "run", "start:prod"]

@@ -164,7 +164,7 @@ export class TransactionsController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
-  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER, Role.OPERATOR)
+  @Roles(Role.SUPER_ADMIN, Role.TENANT_ADMIN, Role.MANAGER)
   async create(
     @Body() body: { amount: number; currency?: string; reference: string; merchantId: string; paymentMethod?: string; status?: any },
     @Req() req: any,

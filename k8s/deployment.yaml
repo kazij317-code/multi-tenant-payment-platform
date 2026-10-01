@@ -20,7 +20,7 @@ spec:
           image: payment-platform-api:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 3000
+            - containerPort: 5000
           envFrom:
             - configMapRef:
                 name: payment-api-config
@@ -36,13 +36,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: 3000
+              port: 5000
             initialDelaySeconds: 15
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /
-              port: 3000
+              port: 5000
             initialDelaySeconds: 5
             periodSeconds: 5
 ---
@@ -58,4 +58,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: 5000

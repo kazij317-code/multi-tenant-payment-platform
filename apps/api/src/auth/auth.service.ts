@@ -146,6 +146,7 @@ export class AuthService {
         email: dto.email,
         passwordHash: hashedPassword,
         tenantId: tenant.id,
+        role: 'OPERATOR',
       },
     });
 

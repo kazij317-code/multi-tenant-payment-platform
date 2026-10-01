@@ -1,20 +1,7 @@
-// import axios from 'axios';
-
-// const API = axios.create({
-//   baseURL: 'http://localhost:5000', // আপনার নেস্টজেএস ব্যাকএন্ডের পোর্ট (প্রয়োজন অনুযায়ী পরিবর্তন করে নেবেন)
-//   withCredentials: true,
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// });
-
-// export default API;
-
-// -----------
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

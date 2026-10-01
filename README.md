@@ -45,7 +45,7 @@ npm run start:dev
 ```
 
 - **Swagger Documentation**: [http://localhost:5000/api-docs](http://localhost:5000/api-docs)
-- **Frontend App**: [http://localhost:3000](http://localhost:3000)
+- **Frontend App**: [http://localhost:3001](http://localhost:3001)
 - **Mailpit Dashboard**: [http://localhost:8025](http://localhost:8025)
 - **Prometheus Dashboard**: [http://localhost:9090](http://localhost:9090)
 
