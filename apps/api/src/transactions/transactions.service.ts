@@ -663,9 +663,11 @@ export class TransactionsService {
       tenantId: tenantId,
     });
 
-    // ইমেল নোটিফিকেশন
+    // ইমেল নোটিফিকেশন (নন-ব্লকিং)
     const userEmail = transaction.merchant?.email || 'admin@example.com'; 
-    await this.mailService.sendTransactionEmail(userEmail, transaction.reference, 'COMPLETED');
+    this.mailService.sendTransactionEmail(userEmail, transaction.reference, 'COMPLETED').catch((err) => {
+      console.error('Email send error:', err);
+    });
 
     // অডিট লগ রেকর্ড করা
     if (userId) {
