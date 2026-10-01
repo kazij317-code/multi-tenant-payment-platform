@@ -10,6 +10,13 @@ export default function NotificationsDropdown() {
 
   useEffect(() => {
     fetchNotifications();
+
+    // Auto-poll notifications every 10 seconds for real-time updates without page refresh
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchNotifications = async () => {
