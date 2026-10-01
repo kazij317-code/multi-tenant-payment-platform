@@ -636,19 +636,22 @@ export class TransactionsService {
     });
   }
 
-  // ট্রানজেকশন অ্যাপ্রুভ করা
-  async approveTransaction(transactionId: string, tenantId: string, userId?: string) {
+  async approveTransaction(transactionId: string, tenantId: string, userId?: string, isSuperAdmin: boolean = false) {
+    const whereCondition: any = { id: transactionId };
+    if (!isSuperAdmin) {
+      whereCondition.merchant = { tenantId };
+    }
+
     const transaction = await this.prisma.transaction.findFirst({
-      where: {
-        id: transactionId,
-        merchant: { tenantId },
-      },
+      where: whereCondition,
       include: { merchant: true },
     });
 
     if (!transaction) {
       throw new NotFoundException('Transaction not found or does not belong to this tenant');
     }
+
+    const targetTenantId = transaction.merchant?.tenantId || tenantId;
 
     const updatedTransaction = await this.prisma.transaction.update({
       where: { id: transactionId },
@@ -660,7 +663,7 @@ export class TransactionsService {
       title: 'Transaction Approved',
       message: `Transaction ${transaction.reference} has been approved successfully.`,
       type: 'TRANSACTION',
-      tenantId: tenantId,
+      tenantId: targetTenantId,
     });
 
     // ইমেল নোটিফিকেশন (নন-ব্লকিং)
@@ -674,7 +677,7 @@ export class TransactionsService {
       await this.auditLogsService.createLog({
         action: 'TRANSACTION_APPROVED',
         userId: userId,
-        tenantId: tenantId,
+        tenantId: targetTenantId,
         details: `Transaction ${transaction.reference} was approved.`,
       });
     }
@@ -686,18 +689,22 @@ export class TransactionsService {
   }
 
   // ট্রানজেকশন রিজেক্ট করা
-  async rejectTransaction(transactionId: string, tenantId: string, userId?: string) {
+  async rejectTransaction(transactionId: string, tenantId: string, userId?: string, isSuperAdmin: boolean = false) {
+    const whereCondition: any = { id: transactionId };
+    if (!isSuperAdmin) {
+      whereCondition.merchant = { tenantId };
+    }
+
     const transaction = await this.prisma.transaction.findFirst({
-      where: {
-        id: transactionId,
-        merchant: { tenantId },
-      },
+      where: whereCondition,
       include: { merchant: true },
     });
 
     if (!transaction) {
       throw new NotFoundException('Transaction not found or does not belong to this tenant');
     }
+
+    const targetTenantId = transaction.merchant?.tenantId || tenantId;
 
     const updatedTransaction = await this.prisma.transaction.update({
       where: { id: transactionId },
@@ -709,7 +716,7 @@ export class TransactionsService {
       title: 'Transaction Failed',
       message: `Transaction ${transaction.reference} has been rejected / failed.`,
       type: 'TRANSACTION',
-      tenantId: tenantId,
+      tenantId: targetTenantId,
     });
 
     // ইমেল নোটিফিকেশন: Status Updated
@@ -721,7 +728,7 @@ export class TransactionsService {
       await this.auditLogsService.createLog({
         action: 'TRANSACTION_REJECTED',
         userId: userId,
-        tenantId: tenantId,
+        tenantId: targetTenantId,
         details: `Transaction ${transaction.reference} was rejected.`,
       });
     }
@@ -733,18 +740,22 @@ export class TransactionsService {
   }
 
   // ট্রানজেকশন রিফান্ড করা
-  async refundTransaction(transactionId: string, tenantId: string, userId?: string) {
+  async refundTransaction(transactionId: string, tenantId: string, userId?: string, isSuperAdmin: boolean = false) {
+    const whereCondition: any = { id: transactionId };
+    if (!isSuperAdmin) {
+      whereCondition.merchant = { tenantId };
+    }
+
     const transaction = await this.prisma.transaction.findFirst({
-      where: {
-        id: transactionId,
-        merchant: { tenantId },
-      },
+      where: whereCondition,
       include: { merchant: true },
     });
 
     if (!transaction) {
       throw new NotFoundException('Transaction not found or does not belong to this tenant');
     }
+
+    const targetTenantId = transaction.merchant?.tenantId || tenantId;
 
     if (transaction.status !== 'SUCCESS' && transaction.status !== 'COMPLETED') {
       throw new BadRequestException('Only completed transactions can be refunded');
@@ -760,7 +771,7 @@ export class TransactionsService {
       title: 'Transaction Refunded',
       message: `Transaction ${transaction.reference} has been refunded.`,
       type: 'TRANSACTION',
-      tenantId: tenantId,
+      tenantId: targetTenantId,
     });
 
     // ইমেল নোটিফিকেশন
@@ -772,7 +783,7 @@ export class TransactionsService {
       await this.auditLogsService.createLog({
         action: 'TRANSACTION_REFUNDED',
         userId: userId,
-        tenantId: tenantId,
+        tenantId: targetTenantId,
         details: `Transaction ${transaction.reference} was refunded.`,
       });
     }

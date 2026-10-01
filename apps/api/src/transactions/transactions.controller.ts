@@ -195,7 +195,8 @@ export class TransactionsController {
   async approve(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
     const userId = req.user.userId || req.user.sub || req.user.id;
-    return this.transactionsService.approveTransaction(id, tenantId, userId);
+    const isSuperAdmin = req.user.role === Role.SUPER_ADMIN;
+    return this.transactionsService.approveTransaction(id, tenantId, userId, isSuperAdmin);
   }
 
   // ট্রানজেকশন রিজেক্ট রাউট
@@ -205,7 +206,8 @@ export class TransactionsController {
   async reject(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
     const userId = req.user.userId || req.user.sub || req.user.id;
-    return this.transactionsService.rejectTransaction(id, tenantId, userId);
+    const isSuperAdmin = req.user.role === Role.SUPER_ADMIN;
+    return this.transactionsService.rejectTransaction(id, tenantId, userId, isSuperAdmin);
   }
 
   // ট্রানজেকশন রিফান্ড রাউট
@@ -215,6 +217,7 @@ export class TransactionsController {
   async refund(@Param('id') id: string, @Req() req: any) {
     const tenantId = req.user.tenantId;
     const userId = req.user.userId || req.user.sub || req.user.id;
-    return this.transactionsService.refundTransaction(id, tenantId, userId);
+    const isSuperAdmin = req.user.role === Role.SUPER_ADMIN;
+    return this.transactionsService.refundTransaction(id, tenantId, userId, isSuperAdmin);
   }
 }
