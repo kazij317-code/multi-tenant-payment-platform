@@ -123,6 +123,104 @@ async function main() {
     },
   });
 
+  // 3. Create Demo Merchants for Beta Corp and Acme Corp
+  const betaMerchant1 = await prisma.merchant.upsert({
+    where: { id: 'm-beta-1' },
+    update: {},
+    create: {
+      id: 'm-beta-1',
+      name: 'Beta Electronics Store',
+      email: 'store@beta.com',
+      tenantId: betaTenant.id,
+      status: 'ACTIVE',
+    },
+  });
+
+  const betaMerchant2 = await prisma.merchant.upsert({
+    where: { id: 'm-beta-2' },
+    update: {},
+    create: {
+      id: 'm-beta-2',
+      name: 'Beta Fashion Wear',
+      email: 'fashion@beta.com',
+      tenantId: betaTenant.id,
+      status: 'ACTIVE',
+    },
+  });
+
+  const acmeMerchant1 = await prisma.merchant.upsert({
+    where: { id: 'm-acme-1' },
+    update: {},
+    create: {
+      id: 'm-acme-1',
+      name: 'Acme Supermart',
+      email: 'supermart@acme.com',
+      tenantId: acmeTenant.id,
+      status: 'ACTIVE',
+    },
+  });
+
+  // Additional demo merchants to total 10 active profiles
+  for (let i = 3; i <= 7; i++) {
+    await prisma.merchant.upsert({
+      where: { id: `m-beta-${i}` },
+      update: {},
+      create: {
+        id: `m-beta-${i}`,
+        name: `Beta Merchant Branch #${i}`,
+        email: `branch${i}@beta.com`,
+        tenantId: betaTenant.id,
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  // Additional users to total 11 registered members
+  for (let i = 1; i <= 6; i++) {
+    const pwdHash = await bcrypt.hash('user123', 10);
+    await prisma.user.upsert({
+      where: { email: `user${i}@beta.com` },
+      update: {},
+      create: {
+        email: `user${i}@beta.com`,
+        passwordHash: pwdHash,
+        role: 'OPERATOR',
+        tenantId: betaTenant.id,
+        firstName: `Staff_${i}`,
+        lastName: 'Beta',
+      },
+    });
+  }
+
+  // 4. Create 14 Demo Transactions to reach $9,420 Revenue ($9,292 SUCCESS + $128 COMPLETED)
+  const transactionsData = [
+    { id: 'tx-1', reference: 'TXN-1001', amount: 5000, status: 'SUCCESS', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
+    { id: 'tx-2', reference: 'TXN-1002', amount: 4292, status: 'SUCCESS', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
+    { id: 'tx-3', reference: 'TXN-1003', amount: 128, status: 'COMPLETED', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
+    { id: 'tx-4', reference: 'TXN-1004', amount: 1200, status: 'PENDING', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
+    { id: 'tx-5', reference: 'TXN-1005', amount: 1500, status: 'REFUNDED', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
+    { id: 'tx-6', reference: 'TXN-1006', amount: 1100, status: 'REFUNDED', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
+    { id: 'tx-7', reference: 'TXN-1007', amount: 1000, status: 'REFUNDED', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
+    { id: 'tx-8', reference: 'TXN-1008', amount: 350, status: 'PROCESSING', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
+    { id: 'tx-9', reference: 'TXN-1009', amount: 450, status: 'PROCESSING', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
+    { id: 'tx-10', reference: 'TXN-1010', amount: 200, status: 'PROCESSING', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
+    { id: 'tx-11', reference: 'TXN-1011', amount: 150, status: 'PROCESSING', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
+    { id: 'tx-12', reference: 'TXN-1012', amount: 500, status: 'PROCESSING', paymentMethod: 'Card', merchantId: acmeMerchant1.id },
+    { id: 'tx-13', reference: 'TXN-1013', amount: 300, status: 'PROCESSING', paymentMethod: 'bKash', merchantId: betaMerchant1.id },
+    { id: 'tx-14', reference: 'TXN-1014', amount: 250, status: 'PROCESSING', paymentMethod: 'Nagad', merchantId: betaMerchant2.id },
+  ];
+
+  for (const tx of transactionsData) {
+    await prisma.transaction.upsert({
+      where: { id: tx.id },
+      update: {
+        amount: tx.amount,
+        status: tx.status,
+      },
+      create: tx,
+    });
+  }
+
   console.log('Database seeding completed successfully!');
 }
 
