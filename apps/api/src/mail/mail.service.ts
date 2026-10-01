@@ -19,7 +19,7 @@ export class MailService {
   }
 
   async sendPasswordResetEmail(to: string, resetToken: string) {
-    const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://multi-tenant-payment-platform.vercel.app';
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
     try {
       await this.mailerService.sendMail({
