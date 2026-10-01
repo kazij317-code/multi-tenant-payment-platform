@@ -7,8 +7,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
     MailerModule.forRoot({
       transport: {
         host: process.env.MAIL_HOST || 'smtp.gmail.com',
-        port: 465,
-        secure: true,
+        port: parseInt(process.env.MAIL_PORT || '465', 10),
+        secure: process.env.MAIL_PORT === '465' || !process.env.MAIL_PORT,
         auth: {
           user: process.env.MAIL_USER || 'kazij317@gmail.com',
           pass: process.env.MAIL_PASSWORD || 'yyzeetowehlnrbxm',
