@@ -27,6 +27,7 @@ describe('Authentication (e2e)', () => {
         .send({
           email: 'nonexistent@example.com',
           password: 'WrongPassword123!',
+          tenantSlug: 'beta-corp',
         })
         .expect(401);
     });

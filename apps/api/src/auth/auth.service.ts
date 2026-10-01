@@ -131,6 +131,10 @@ export class AuthService {
   }
 
   async register(dto: { email: string; password: string; tenantSlug: string }) {
+    if (!dto || !dto.tenantSlug) {
+      throw new BadRequestException('tenantSlug and required fields must be provided');
+    }
+
     const tenant = await this.prisma.tenant.findUnique({
       where: { slug: dto.tenantSlug },
     });
@@ -166,6 +170,10 @@ export class AuthService {
 
   // লগইন মেথড (টোকেন পেয়ার জেনারেট করবে)
   async login(dto: { email: string; password: string; tenantSlug: string }) {
+    if (!dto || !dto.tenantSlug) {
+      throw new BadRequestException('tenantSlug and required fields must be provided');
+    }
+
     const tenant = await this.prisma.tenant.findUnique({
       where: { slug: dto.tenantSlug },
     });
