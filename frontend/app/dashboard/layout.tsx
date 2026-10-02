@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -29,12 +30,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex flex-col h-screen bg-gray-100 overflow-hidden">
       {/* Top Main Navbar */}
-      <Navbar />
+      <Navbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
       {/* Main Body below Navbar */}
-      <div className="flex flex-1 pt-16 overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      <div className="flex flex-1 pt-16 overflow-hidden relative">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );

@@ -66,19 +66,19 @@ export default function OverviewPage() {
   return (
     <div className="space-y-8">
       {/* Top Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
             <span>{isSuperAdmin ? '⚡ Global System Overview' : 'Dashboard Overview'}</span>
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             {isSuperAdmin
               ? 'Real-time multi-tenant platform metrics, system health, and recent activities.'
               : 'Welcome to your multi-tenant payment platform dashboard.'}
           </p>
         </div>
         {isSuperAdmin && (
-          <span className="px-3.5 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">
+          <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full shrink-0">
             SYSTEM HEALTH: {loading ? '...' : (summary?.systemHealth || '100% Operational')}
           </span>
         )}

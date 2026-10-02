@@ -222,24 +222,24 @@ export default function TransactionsPage() {
       ) : transactions.length === 0 ? (
         <p className="text-sm text-gray-500">No transactions match your search or filter.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-gray-100 rounded-lg">
           <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
             <thead className="bg-gray-50 text-gray-500 font-semibold uppercase text-[11px] tracking-wider">
               <tr>
-                <th className="px-6 py-3">Transaction ID</th>
-                {isSuperAdmin && <th className="px-6 py-3">Tenant</th>}
-                <th className="px-6 py-3">Merchant</th>
-                <th className="px-6 py-3">Amount</th>
-                <th className="px-6 py-3">Payment Method</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Created Date</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Transaction ID</th>
+                {isSuperAdmin && <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Tenant</th>}
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Merchant</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Amount</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Payment Method</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Status</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Created Date</th>
+                <th className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {transactions.map((tx: any) => (
                 <tr key={tx.id} className="hover:bg-gray-50/80 transition-colors">
-                  <td className="px-6 py-4 font-mono font-semibold text-gray-900">
+                  <td className="px-4 sm:px-6 py-4 font-mono font-semibold text-gray-900 whitespace-nowrap">
                     <button
                       onClick={() => setSelectedTx(tx)}
                       className="text-indigo-600 hover:underline font-mono"
@@ -248,29 +248,29 @@ export default function TransactionsPage() {
                     </button>
                   </td>
                   {isSuperAdmin && (
-                    <td className="px-6 py-4 font-semibold text-purple-700 text-xs">
+                    <td className="px-4 sm:px-6 py-4 font-semibold text-purple-700 text-xs whitespace-nowrap">
                       {tx.merchant?.tenant?.name || tx.merchant?.tenant?.slug || 'N/A'}
                     </td>
                   )}
-                  <td className="px-6 py-4 text-gray-700 font-medium">{tx.merchant?.name || 'N/A'}</td>
-                  <td className="px-6 py-4 font-bold text-gray-900">
+                  <td className="px-4 sm:px-6 py-4 text-gray-700 font-medium whitespace-nowrap">{tx.merchant?.name || 'N/A'}</td>
+                  <td className="px-4 sm:px-6 py-4 font-bold text-gray-900 whitespace-nowrap">
                     {tx.currency === 'BDT' ? '৳' : tx.currency === 'EUR' ? '€' : '$'}
                     {tx.amount.toLocaleString()} <span className="text-[10px] text-gray-500 font-normal">{tx.currency || 'BDT'}</span>
                   </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-slate-700">
+                  <td className="px-4 sm:px-6 py-4 text-xs font-semibold text-slate-700 whitespace-nowrap">
                     <span className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200">
                       💳 {tx.paymentMethod || 'bKash'}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusBadge(tx.status)}`}>
                       {tx.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs text-gray-500">
+                  <td className="px-4 sm:px-6 py-4 text-xs text-gray-500 whitespace-nowrap">
                     {new Date(tx.createdAt).toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 text-right space-x-2">
+                  <td className="px-4 sm:px-6 py-4 text-right space-x-1.5 sm:space-x-2 whitespace-nowrap">
                     <button
                       onClick={() => setSelectedTx(tx)}
                       className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-medium"
@@ -312,7 +312,7 @@ export default function TransactionsPage() {
       {/* CREATE TRANSACTION MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900">Create New Transaction</h3>
             {error && <div className="bg-red-50 p-3 rounded-md text-sm text-red-600">{error}</div>}
             <form onSubmit={handleCreateTransaction} className="space-y-4">
@@ -425,7 +425,7 @@ export default function TransactionsPage() {
       {/* TRANSACTION DETAILS / HISTORY MODAL */}
       {selectedTx && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start border-b border-gray-100 pb-3">
               <div>
                 <h3 className="text-lg font-bold text-gray-900">Transaction Details</h3>

@@ -65,16 +65,16 @@ export default function UserMenu() {
   // লগআউট অবস্থায় বা টোকেন না থাকলে ইমেজের মতো Login টেক্সট ও গ্র্যাডিয়েন্ট Register বোতাম দেখাবে
   if (!user) {
     return (
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <Link
           href="/login"
-          className="text-base font-medium text-slate-700 hover:text-indigo-600 transition-colors px-2 py-1"
+          className="text-xs sm:text-base font-medium text-slate-700 hover:text-indigo-600 transition-colors px-2 py-1"
         >
           Login
         </Link>
         <Link
           href="/register"
-          className="text-base font-bold text-white bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 px-6 py-2.5 rounded-2xl shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+          className="text-xs sm:text-base font-bold text-white bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 px-3 py-1.5 sm:px-6 sm:py-2.5 rounded-xl sm:rounded-2xl shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
         >
           Register
         </Link>

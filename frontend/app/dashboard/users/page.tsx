@@ -196,28 +196,28 @@ export default function UsersPage() {
       ) : users.length === 0 ? (
         <p className="text-sm text-gray-500">No users found.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-gray-100 rounded-lg">
           <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
             <thead className="bg-gray-50 text-gray-500 font-semibold uppercase text-[11px] tracking-wider">
               <tr>
-                <th className="px-6 py-3">User Email</th>
-                {isSuperAdmin && <th className="px-6 py-3">Tenant</th>}
-                <th className="px-6 py-3">Assigned Role</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Joined Date</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">User Email</th>
+                {isSuperAdmin && <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Tenant</th>}
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Assigned Role</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Status</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Joined Date</th>
+                <th className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {users.map((u: any) => (
                 <tr key={u.id} className="hover:bg-gray-50/80 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-gray-900">{u.email}</td>
+                  <td className="px-4 sm:px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">{u.email}</td>
                   {isSuperAdmin && (
-                    <td className="px-6 py-4 font-mono text-xs text-purple-700 font-semibold">
+                    <td className="px-4 sm:px-6 py-4 font-mono text-xs text-purple-700 font-semibold whitespace-nowrap">
                       {u.tenant?.name || u.tenant?.slug || u.tenantId}
                     </td>
                   )}
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     {isSuperAdmin ? (
                       <select
                         value={u.role}
@@ -236,7 +236,7 @@ export default function UsersPage() {
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-full ${
                         u.isActive !== false
@@ -247,10 +247,10 @@ export default function UsersPage() {
                       {u.isActive !== false ? 'Active' : 'Blocked'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs text-gray-500">
+                  <td className="px-4 sm:px-6 py-4 text-xs text-gray-500 whitespace-nowrap">
                     {new Date(u.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 text-right space-x-2">
+                  <td className="px-4 sm:px-6 py-4 text-right space-x-1.5 sm:space-x-2 whitespace-nowrap">
                     <button
                       onClick={() => {
                         setEditingUser(u);
@@ -317,7 +317,7 @@ export default function UsersPage() {
       {/* CREATE USER MODAL */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900">Create New User</h3>
             {error && <div className="bg-red-50 p-3 rounded-md text-sm text-red-600">{error}</div>}
             <form onSubmit={handleCreateUser} className="space-y-4">
@@ -381,7 +381,7 @@ export default function UsersPage() {
       {/* UPDATE / ASSIGN ROLE MODAL */}
       {editingUser && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900">Update User & Assign Role</h3>
             {error && <div className="bg-red-50 p-3 rounded-md text-sm text-red-600">{error}</div>}
             <form onSubmit={handleUpdateUser} className="space-y-4">

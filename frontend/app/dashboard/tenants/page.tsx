@@ -107,13 +107,13 @@ export default function TenantManagementPage() {
           <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
             <thead className="bg-gray-50 text-gray-500 font-semibold uppercase text-[11px] tracking-wider">
               <tr>
-                <th className="px-6 py-3">Tenant Name</th>
-                <th className="px-6 py-3">Slug</th>
-                <th className="px-6 py-3">Users</th>
-                <th className="px-6 py-3">Merchants</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Created At</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Tenant Name</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Slug</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Users</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Merchants</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Status</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Created At</th>
+                <th className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
@@ -132,11 +132,11 @@ export default function TenantManagementPage() {
               ) : (
                 tenants.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-gray-900">{item.name}</td>
-                    <td className="px-6 py-4 font-mono text-gray-600 text-xs">{item.slug}</td>
-                    <td className="px-6 py-4 text-gray-600">{item._count?.users ?? 0}</td>
-                    <td className="px-6 py-4 text-gray-600">{item._count?.merchants ?? 0}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">{item.name}</td>
+                    <td className="px-4 sm:px-6 py-4 font-mono text-gray-600 text-xs whitespace-nowrap">{item.slug}</td>
+                    <td className="px-4 sm:px-6 py-4 text-gray-600 whitespace-nowrap">{item._count?.users ?? 0}</td>
+                    <td className="px-4 sm:px-6 py-4 text-gray-600 whitespace-nowrap">{item._count?.merchants ?? 0}</td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-full ${
                           item.status === 'ACTIVE'
@@ -147,10 +147,10 @@ export default function TenantManagementPage() {
                         {item.status || 'ACTIVE'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-500 text-xs">
+                    <td className="px-4 sm:px-6 py-4 text-gray-500 text-xs whitespace-nowrap">
                       {new Date(item.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 sm:px-6 py-4 text-right whitespace-nowrap">
                       <button
                         onClick={() => handleToggleStatus(item.id, item.status || 'ACTIVE')}
                         className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
@@ -173,7 +173,7 @@ export default function TenantManagementPage() {
       {/* Modal for Creating New Tenant */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900">Create New Tenant</h3>
             <form onSubmit={handleCreateTenant} className="space-y-4">
               <div>

@@ -143,26 +143,26 @@ export default function MerchantsPage() {
       ) : merchants.length === 0 ? (
         <p className="text-sm text-gray-500">No merchants found.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-gray-100 rounded-lg">
           <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
             <thead className="bg-gray-50 text-gray-500 font-semibold uppercase text-[11px] tracking-wider">
               <tr>
-                {isSuperAdmin && <th className="px-6 py-3">Tenant Name</th>}
-                <th className="px-6 py-3">Merchant Name</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                {isSuperAdmin && <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Tenant Name</th>}
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Merchant Name</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Email</th>
+                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Status</th>
+                <th className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {merchants.map((merchant: any) => (
                 <tr key={merchant.id} className="hover:bg-gray-50/80 transition-colors">
                   {isSuperAdmin && (
-                    <td className="px-6 py-4 font-semibold text-purple-700 text-xs">
+                    <td className="px-4 sm:px-6 py-4 font-semibold text-purple-700 text-xs whitespace-nowrap">
                       {merchant.tenant?.name || merchant.tenant?.slug || 'N/A'}
                     </td>
                   )}
-                  <td className="px-6 py-4 font-semibold text-gray-900">
+                  <td className="px-4 sm:px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">
                     <button
                       onClick={() => handleViewProfile(merchant.id)}
                       className="text-indigo-600 hover:underline text-left font-semibold"
@@ -170,8 +170,8 @@ export default function MerchantsPage() {
                       {merchant.name}
                     </button>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{merchant.email}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4 text-gray-600 whitespace-nowrap">{merchant.email}</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-full ${
                         merchant.status === 'ACTIVE'
@@ -182,7 +182,7 @@ export default function MerchantsPage() {
                       {merchant.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right space-x-2">
+                  <td className="px-4 sm:px-6 py-4 text-right space-x-1.5 sm:space-x-2 whitespace-nowrap">
                     <button
                       onClick={() => handleViewProfile(merchant.id)}
                       className="px-2.5 py-1 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors"
@@ -222,7 +222,7 @@ export default function MerchantsPage() {
       {/* CREATE MERCHANT MODAL */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900">Add New Merchant</h3>
             {error && <div className="bg-red-50 p-3 rounded-md text-sm text-red-600">{error}</div>}
             <form onSubmit={handleCreateMerchant} className="space-y-4">
@@ -275,7 +275,7 @@ export default function MerchantsPage() {
       {/* EDIT MERCHANT MODAL */}
       {editingMerchant && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900">Update Merchant Details</h3>
             {error && <div className="bg-red-50 p-3 rounded-md text-sm text-red-600">{error}</div>}
             <form onSubmit={handleUpdateMerchant} className="space-y-4">
