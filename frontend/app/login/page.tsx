@@ -341,7 +341,7 @@ export default function LoginPage() {
       } else if (typeof serverMsg === 'string') {
         setError(serverMsg);
       } else if (err.message && err.message.includes('Network Error')) {
-        setError('Network Error: Cannot connect to backend server at http://localhost:5000');
+        setError('Network Error: Cannot connect to backend server. Please check your internet connection.');
       } else {
         setError('Invalid email, password, or tenant slug');
       }
